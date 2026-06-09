@@ -37,7 +37,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ? [
         { href: '/dashboard', icon: LayoutDashboard, label: 'Panel' },
         { href: '/dashboard/perfil', icon: User, label: 'Mi Perfil' },
-        { href: '/dashboard/ofertas', icon: Briefcase, label: 'Ofertas' },
+        { href: '/dashboard/candidaturas', icon: Briefcase, label: 'Candidaturas' },
         { href: '/dashboard/chat', icon: MessageSquare, label: 'Mensajes' },
         { href: '/dashboard/suscripcion', icon: CreditCard, label: 'Suscripción' },
       ]

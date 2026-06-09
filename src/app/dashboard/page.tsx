@@ -83,7 +83,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-base">Mis candidaturas recientes</CardTitle>
-              <Link href="/dashboard/ofertas">
+              <Link href="/dashboard/candidaturas">
                 <Button variant="ghost" size="sm" className="gap-1 text-xs">Ver todas <ArrowRight className="h-3 w-3" /></Button>
               </Link>
             </CardHeader>
