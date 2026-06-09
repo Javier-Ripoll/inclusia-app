@@ -1,0 +1,176 @@
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ApplyButton } from './apply-button'
+import {
+  ArrowLeft, MapPin, Briefcase, Clock, Calendar,
+  Euro, GraduationCap, Zap, CheckCircle, Building2
+} from 'lucide-react'
+
+const AVAILABILITY_LABELS: Record<string, string> = {
+  full_time: 'Jornada completa', part_time: 'Media jornada',
+  mornings: 'Mañanas', afternoons: 'Tardes',
+  weekends: 'Fines de semana', on_call: 'A llamada',
+}
+
+export default async function OfferPublicPage({ params }: { params: { id: string } }) {
+  const supabase = await createClient()
+
+  const { data: offer } = await supabase
+    .from('job_offers')
+    .select('*, company_profiles(company_name, description, logo_url, verified, city)')
+    .eq('id', params.id)
+    .eq('status', 'active')
+    .single()
+
+  if (!offer) notFound()
+
+  // Check if current user already applied
+  const { data: { user } } = await supabase.auth.getUser()
+  let alreadyApplied = false
+  let professionalProfileId: string | null = null
+
+  if (user) {
+    const { data: prof } = await supabase
+      .from('professional_profiles').select('id').eq('user_id', user.id).single()
+    professionalProfileId = prof?.id ?? null
+
+    if (prof) {
+      const { data: existing } = await supabase
+        .from('applications')
+        .select('id').eq('offer_id', params.id).eq('professional_id', prof.id).single()
+      alreadyApplied = !!existing
+    }
+  }
+
+  const company = offer.company_profiles as any
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <Link href="/ofertas" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="h-4 w-4" /> Volver a ofertas
+        </Link>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Main content */}
+          <div className="md:col-span-2 space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                      {offer.is_urgent && (
+                        <Badge variant="destructive" className="gap-1">
+                          <Zap className="h-3 w-3" /> Urgente
+                        </Badge>
+                      )}
+                      {offer.offer_type === 'substitute' && (
+                        <Badge variant="secondary">Sustitución</Badge>
+                      )}
+                    </div>
+                    <h1 className="text-2xl font-bold">{offer.title}</h1>
+                    <p className="text-muted-foreground font-medium mt-1 flex items-center gap-1">
+                      <Building2 className="h-4 w-4" />
+                      {company?.company_name}
+                      {company?.verified && <span className="text-blue-500 text-sm">✓</span>}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b">
+                  {offer.city && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{offer.city}{offer.province ? `, ${offer.province}` : ''}</span>}
+                  {offer.contract_type && <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4" />{offer.contract_type}</span>}
+                  {offer.start_date && <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />Incorporación: {new Date(offer.start_date).toLocaleDateString('es-ES')}</span>}
+                  <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />Publicada {new Date(offer.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}</span>
+                </div>
+
+                <div>
+                  <h2 className="font-semibold mb-3">Descripción del puesto</h2>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{offer.description}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {offer.required_specializations?.length > 0 && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="font-semibold mb-3 flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5" /> Especialización requerida
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {offer.required_specializations.map((s: string) => (
+                      <Badge key={s} variant="secondary">{s}</Badge>
+                    ))}
+                  </div>
+                  {offer.required_experience_years > 0 && (
+                    <p className="text-sm text-muted-foreground mt-3">
+                      Experiencia mínima: <strong>{offer.required_experience_years} año{offer.required_experience_years !== 1 ? 's' : ''}</strong>
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Apply card */}
+            <Card className="sticky top-4">
+              <CardContent className="p-5">
+                {offer.salary_min && (
+                  <div className="mb-4 pb-4 border-b">
+                    <p className="text-xs text-muted-foreground mb-0.5">Salario</p>
+                    <p className="text-xl font-bold text-primary flex items-center gap-1">
+                      <Euro className="h-4 w-4" />
+                      {offer.salary_min.toLocaleString('es-ES')}
+                      {offer.salary_max ? ` – ${offer.salary_max.toLocaleString('es-ES')}` : '+'}
+                      <span className="text-sm font-normal text-muted-foreground">/año</span>
+                    </p>
+                  </div>
+                )}
+
+                {offer.availability_needed?.length > 0 && (
+                  <div className="mb-4 pb-4 border-b">
+                    <p className="text-xs text-muted-foreground mb-2">Disponibilidad</p>
+                    <div className="flex flex-col gap-1.5">
+                      {offer.availability_needed.map((a: string) => (
+                        <span key={a} className="flex items-center gap-1.5 text-sm">
+                          <CheckCircle className="h-3.5 w-3.5 text-green-500" />
+                          {AVAILABILITY_LABELS[a] ?? a}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <ApplyButton
+                  offerId={params.id}
+                  professionalProfileId={professionalProfileId}
+                  alreadyApplied={alreadyApplied}
+                  isLoggedIn={!!user}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Company card */}
+            <Card>
+              <CardContent className="p-5">
+                <p className="text-xs text-muted-foreground mb-2">Centro / Entidad</p>
+                <p className="font-semibold flex items-center gap-1">
+                  {company?.company_name}
+                  {company?.verified && <span className="text-blue-500 text-sm">✓</span>}
+                </p>
+                {company?.city && <p className="text-sm text-muted-foreground">{company.city}</p>}
+                {company?.description && <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{company.description}</p>}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

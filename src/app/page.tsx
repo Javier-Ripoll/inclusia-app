@@ -1,65 +1,336 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Navbar } from '@/components/layout/navbar'
+import { Footer } from '@/components/layout/footer'
+import {
+  Zap, Users, Brain, MapPin, Bell, Star, Clock, Shield,
+  CheckCircle, ArrowRight, Building2, GraduationCap
+} from 'lucide-react'
 
-export default function Home() {
+const SPECIALIZATIONS = [
+  'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
+  'Terapia Ocupacional', 'Logopedia', 'Educación Infantil', 'Psicología Educativa',
+]
+
+const HOW_IT_WORKS = [
+  {
+    icon: Building2,
+    step: '1',
+    title: 'El centro publica la necesidad',
+    desc: 'En segundos: qué perfil necesitan, dónde y cuándo.',
+  },
+  {
+    icon: Bell,
+    step: '2',
+    title: 'Profesionales reciben la alerta',
+    desc: 'Los disponibles en la zona son notificados al instante.',
+  },
+  {
+    icon: CheckCircle,
+    step: '3',
+    title: 'La vacante queda cubierta',
+    desc: 'El centro elige y confirma. En minutos, no en días.',
+  },
+]
+
+const STATS = [
+  { value: '<30 min', label: 'Tiempo medio de cobertura' },
+  { value: '500+', label: 'Profesionales activos' },
+  { value: '95%', label: 'Tasa de éxito en urgencias' },
+  { value: '3 provincias', label: 'Cobertura y creciendo' },
+]
+
+const PROFESSIONAL_FEATURES = [
+  { icon: Bell, text: 'Alertas instantáneas de nuevas ofertas' },
+  { icon: Zap, text: 'Acceso prioritario a sustituciones urgentes' },
+  { icon: Brain, text: 'Matching IA: las mejores ofertas para tu perfil' },
+  { icon: Star, text: 'Perfil destacado ante reclutadores' },
+  { icon: MapPin, text: 'Filtrado avanzado por zona exacta' },
+  { icon: Clock, text: 'Respuesta antes que los usuarios gratuitos' },
+]
+
+const COMPANY_FEATURES = [
+  { icon: Zap, text: 'Candidatos "disponibles ahora" en tiempo real' },
+  { icon: Brain, text: 'Ranking IA de candidatos por compatibilidad' },
+  { icon: Bell, text: 'Cobertura urgente automática con envío masivo' },
+  { icon: MapPin, text: 'Geolocalización avanzada por zona' },
+  { icon: Star, text: 'Bolsa de talento: guarda tus favoritos' },
+  { icon: Shield, text: 'Dashboard de métricas de contratación' },
+]
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Navbar />
+      <main>
+        {/* HERO */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-white to-blue-50 py-20 md:py-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <Badge variant="secondary" className="mb-6 text-primary border-primary/20 bg-primary/10">
+              Cobertura de apoyo educativo en tiempo real
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+              Cubre apoyos educativos{' '}
+              <span className="text-primary">en minutos,</span>{' '}
+              no en días
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+              Inclusia conecta centros educativos y entidades con profesionales de apoyo
+              disponibles en su zona. Respuesta rápida, perfil adecuado, sin esperas.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/auth/registro?rol=empresa">
+                <Button size="lg" className="gap-2 text-base px-8">
+                  <Building2 className="h-5 w-5" />
+                  Soy un centro o entidad
+                </Button>
+              </Link>
+              <Link href="/auth/registro?rol=profesional">
+                <Button size="lg" variant="outline" className="gap-2 text-base px-8">
+                  <GraduationCap className="h-5 w-5" />
+                  Soy un profesional
+                </Button>
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center mt-10">
+              {SPECIALIZATIONS.map((s) => (
+                <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* STATS */}
+        <section className="py-16 border-y bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {STATS.map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-primary mb-1">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section className="py-20 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Así funciona Inclusia</h2>
+              <p className="text-muted-foreground text-lg">De la necesidad a la cobertura en tres pasos</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              {HOW_IT_WORKS.map((step) => (
+                <Card key={step.step} className="text-center border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                      <step.icon className="h-7 w-7 text-primary" />
+                    </div>
+                    <div className="text-xs font-bold text-primary/60 uppercase tracking-wider mb-1">Paso {step.step}</div>
+                    <CardTitle className="text-lg">{step.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground text-sm">{step.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PROFESSIONALS */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <Badge className="mb-4 bg-green-100 text-green-700 border-0">Para profesionales</Badge>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Encuentra trabajo antes que el resto
+                </h2>
+                <p className="text-muted-foreground mb-8">
+                  Con el plan Premium recibes alertas instantáneas y acceso prioritario a las
+                  sustituciones urgentes antes de que se publiquen para todos.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {PROFESSIONAL_FEATURES.map((f) => (
+                    <li key={f.text} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
+                        <f.icon className="h-4 w-4 text-green-600" />
+                      </div>
+                      <span className="text-sm">{f.text}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-center gap-4">
+                  <Link href="/auth/registro?rol=profesional">
+                    <Button>Crear perfil gratis</Button>
+                  </Link>
+                  <div className="text-sm text-muted-foreground">
+                    o{' '}
+                    <Link href="/precios#profesionales" className="text-primary hover:underline">
+                      ver plan Premium por 2,99€/mes
+                    </Link>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8">
+                <div className="space-y-4">
+                  {['Integración Social', 'Terapia Ocupacional', 'Logopedia'].map((spec, i) => (
+                    <div key={spec} className="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-sm">{spec}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Valencia · {i === 0 ? 'Urgente' : i === 1 ? 'Jornada completa' : 'Media jornada'}
+                        </div>
+                      </div>
+                      <Badge variant={i === 0 ? 'destructive' : 'secondary'} className="text-xs">
+                        {i === 0 ? 'Urgente' : 'Nueva'}
+                      </Badge>
+                    </div>
+                  ))}
+                  <div className="text-center">
+                    <Badge className="bg-primary/10 text-primary border-0 text-xs">
+                      +12 ofertas nuevas hoy en tu zona
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* COMPANIES */}
+        <section className="py-20 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 order-2 md:order-1">
+                <div className="space-y-3">
+                  <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="font-medium text-sm">Auxiliar educativo – URGENTE</div>
+                      <Badge variant="destructive" className="text-xs">Urgente</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground mb-3">Valencia · Publicado hace 5 min</div>
+                    <div className="flex items-center gap-2 text-xs text-green-600">
+                      <CheckCircle className="h-3 w-3" />
+                      8 profesionales notificados · 3 han respondido
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { top: '< 30 min', bot: 'cobertura' },
+                      { top: '8', bot: 'respuestas' },
+                      { top: '95%', bot: 'éxito' },
+                    ].map((stat) => (
+                      <div key={stat.top} className="bg-white rounded-lg p-3 text-center shadow-sm">
+                        <div className="font-bold text-primary text-sm">{stat.top}</div>
+                        <div className="text-xs text-muted-foreground">{stat.bot}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="order-1 md:order-2">
+                <Badge className="mb-4 bg-blue-100 text-blue-700 border-0">Para centros y entidades</Badge>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Cubre urgencias en minutos, no en días
+                </h2>
+                <p className="text-muted-foreground mb-8">
+                  Publica una necesidad urgente y en minutos profesionales disponibles
+                  en tu zona recibirán la alerta. Sin llamadas, sin esperas.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {COMPANY_FEATURES.map((f) => (
+                    <li key={f.text} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <f.icon className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <span className="text-sm">{f.text}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/auth/registro?rol=empresa">
+                  <Button size="lg" className="gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Empezar – desde 49€/mes
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PRICING TEASER */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Planes para cada necesidad</h2>
+            <p className="text-muted-foreground text-lg mb-10">Sin permanencia. Sin complicaciones.</p>
+            <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+              <Card className="border-2 border-border hover:border-primary/30 transition-colors">
+                <CardHeader>
+                  <Badge variant="secondary" className="w-fit mx-auto mb-2">Profesionales</Badge>
+                  <CardTitle className="text-2xl">
+                    Gratis
+                    <span className="text-sm font-normal text-muted-foreground"> o 2,99€/mes</span>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">Perfil + acceso a ofertas + alertas instantáneas</p>
+                </CardHeader>
+                <CardContent>
+                  <Link href="/auth/registro?rol=profesional">
+                    <Button variant="outline" className="w-full">Crear perfil gratis</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+              <Card className="border-2 border-primary">
+                <CardHeader>
+                  <Badge className="w-fit mx-auto mb-2">Centros y entidades</Badge>
+                  <CardTitle className="text-2xl">
+                    49–199€
+                    <span className="text-sm font-normal text-muted-foreground">/mes</span>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">Publicación ilimitada + matching IA + cobertura urgente</p>
+                </CardHeader>
+                <CardContent>
+                  <Link href="/precios">
+                    <Button className="w-full">Ver todos los planes</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA FINAL */}
+        <section className="py-20 bg-primary text-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              La respuesta educativa empieza aquí
+            </h2>
+            <p className="text-primary-foreground/80 text-lg mb-10">
+              Únete a la red que ya está cubriendo necesidades educativas en tiempo real.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/auth/registro?rol=empresa">
+                <Button size="lg" variant="secondary" className="gap-2 px-8">
+                  <Building2 className="h-5 w-5" />
+                  Soy un centro o entidad
+                </Button>
+              </Link>
+              <Link href="/auth/registro?rol=profesional">
+                <Button size="lg" variant="outline" className="gap-2 px-8 border-white text-white hover:bg-white/10">
+                  <GraduationCap className="h-5 w-5" />
+                  Soy un profesional
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
-    </div>
-  );
+      <Footer />
+    </>
+  )
 }
