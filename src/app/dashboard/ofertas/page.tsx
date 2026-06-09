@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Users, Eye, Zap, Clock, CheckCircle, XCircle, Edit } from 'lucide-react'
+import { Plus, Users, Zap, Clock } from 'lucide-react'
+import { OfferActions } from './offer-actions'
 
 export default async function CompanyOffersPage() {
   const supabase = await createClient()
@@ -97,6 +98,7 @@ export default async function CompanyOffersPage() {
                           <Users className="h-4 w-4" /> Ver candidatos
                         </Button>
                       </Link>
+                      <OfferActions offerId={offer.id} currentStatus={offer.status} />
                     </div>
                   </div>
                 </CardContent>
