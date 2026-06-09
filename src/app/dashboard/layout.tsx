@@ -43,6 +43,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       ]
     : [
         { href: '/dashboard', icon: LayoutDashboard, label: 'Panel' },
+        { href: '/dashboard/empresa', icon: User, label: 'Mi Centro' },
         { href: '/dashboard/ofertas', icon: Briefcase, label: 'Mis Ofertas' },
         { href: '/dashboard/candidatos', icon: Users, label: 'Candidatos' },
         { href: '/dashboard/chat', icon: MessageSquare, label: 'Mensajes' },
