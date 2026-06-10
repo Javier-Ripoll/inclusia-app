@@ -48,6 +48,18 @@ export function ChatWindow({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Mark all messages in this conversation as read on open
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('messages')
+      .update({ read_at: new Date().toISOString() })
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', currentUserId)
+      .is('read_at', null)
+      .then(() => {})
+  }, [conversationId, currentUserId])
+
   // Realtime subscription
   useEffect(() => {
     const supabase = createClient()

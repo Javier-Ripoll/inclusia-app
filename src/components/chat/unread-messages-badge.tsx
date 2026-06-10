@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
@@ -10,6 +11,14 @@ interface Props {
 
 export function UnreadMessagesBadge({ initialCount, userId }: Props) {
   const [count, setCount] = useState(initialCount)
+  const pathname = usePathname()
+
+  // Reset to 0 when user is inside any chat conversation
+  useEffect(() => {
+    if (pathname.startsWith('/dashboard/chat/')) {
+      setCount(0)
+    }
+  }, [pathname])
 
   useEffect(() => {
     const supabase = createClient()
