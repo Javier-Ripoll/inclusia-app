@@ -7,8 +7,6 @@ import { Input } from '@/components/ui/input'
 import { MapPin, Clock, Briefcase, Search, SlidersHorizontal, Zap } from 'lucide-react'
 import Link from 'next/link'
 
-export const revalidate = 60
-
 // Demo offers shown before Supabase is connected
 const DEMO_OFFERS = [
   {
@@ -99,20 +97,29 @@ const DEMO_OFFERS = [
 
 async function getOffers() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!supabaseUrl || supabaseUrl === 'your_supabase_project_url') {
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || supabaseUrl === 'your_supabase_project_url' || !supabaseAnonKey) {
     return { offers: DEMO_OFFERS, isDemo: true }
   }
 
   try {
-    const { createClient } = await import('@/lib/supabase/server')
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('job_offers')
-      .select('*, company_profiles(company_name, logo_url, verified)')
-      .eq('status', 'active')
-      .order('is_urgent', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(30)
+    // Use direct REST fetch — works in static/ISR context without cookies
+    const url = new URL(`${supabaseUrl}/rest/v1/job_offers`)
+    url.searchParams.set('select', '*,company_profiles(company_name,logo_url,verified)')
+    url.searchParams.set('status', 'eq.active')
+    url.searchParams.set('order', 'is_urgent.desc,created_at.desc')
+    url.searchParams.set('limit', '30')
+
+    const res = await fetch(url.toString(), {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+      },
+      next: { revalidate: 60 },
+    })
+
+    if (!res.ok) return { offers: DEMO_OFFERS, isDemo: true }
+    const data = await res.json()
     return { offers: data ?? [], isDemo: false }
   } catch {
     return { offers: DEMO_OFFERS, isDemo: true }
