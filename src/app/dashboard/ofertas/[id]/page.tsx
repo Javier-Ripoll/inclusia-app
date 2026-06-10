@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ApplicationActions } from './application-actions'
+import { StartChatButton } from './start-chat-button'
 import {
   ArrowLeft, MapPin, Briefcase, Clock, Users,
   GraduationCap, Star, CheckCircle, Zap
@@ -157,7 +158,14 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
                           </div>
                         )}
 
-                        <ApplicationActions applicationId={app.id} currentStatus={app.status} phone={profileData?.phone} />
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <ApplicationActions applicationId={app.id} currentStatus={app.status} phone={profileData?.phone} />
+                          <StartChatButton
+                            offerId={id}
+                            companyId={company.id}
+                            professionalId={prof?.id}
+                          />
+                        </div>
                       </div>
                     </div>
                   </CardContent>
