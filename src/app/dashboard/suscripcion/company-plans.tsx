@@ -1,6 +1,7 @@
 'use client'
 
-import { CheckCircle, Zap, Star, Building2 } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle, Zap, Star, Building2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -14,6 +15,7 @@ const PLANS = [
     description: 'Para empezar a publicar',
     icon: Building2,
     accent: false,
+    priceId: null,
     features: [
       'Hasta 3 ofertas activas',
       'Ver candidaturas recibidas',
@@ -31,6 +33,7 @@ const PLANS = [
     icon: Zap,
     accent: true,
     badge: 'Más popular',
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_COMPANY_PRO,
     features: [
       'Ofertas activas ilimitadas',
       'Publicar ofertas urgentes',
@@ -49,6 +52,7 @@ const PLANS = [
     description: 'Para centros con alta rotación',
     icon: Star,
     accent: false,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_COMPANY_PREMIUM,
     features: [
       'Todo lo de Pro',
       'Matching automático con IA',
@@ -66,6 +70,25 @@ interface Props {
 }
 
 export function CompanyPlans({ currentPlan }: Props) {
+  const [loadingKey, setLoadingKey] = useState<string | null>(null)
+
+  async function handleUpgrade(planKey: string, priceId: string) {
+    setLoadingKey(planKey)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId, plan: planKey, role: 'company' }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoadingKey(null)
+    }
+  }
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <div className="mb-8 text-center">
@@ -75,73 +98,79 @@ export function CompanyPlans({ currentPlan }: Props) {
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-3 gap-6">
+      <div className="grid sm:grid-cols-3 gap-6 pt-5 items-stretch">
         {PLANS.map(plan => {
           const isCurrent = currentPlan === plan.key
+          const isLoading = loadingKey === plan.key
           const Icon = plan.icon
 
           return (
-            <Card
-              key={plan.key}
-              className={`relative ${
-                isCurrent
-                  ? 'border-primary ring-1 ring-primary'
-                  : plan.accent
-                    ? 'border-primary/40'
-                    : ''
-              }`}
-            >
-              {plan.accent && (
-                <div className="absolute -top-px left-0 right-0 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-t-xl" />
-              )}
+            <div key={plan.key} className="relative flex flex-col">
               {isCurrent && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-white text-xs px-3">Plan actual</Badge>
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-white text-xs px-3 shadow-sm whitespace-nowrap">Plan actual</Badge>
                 </div>
               )}
               {plan.badge && !isCurrent && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge variant="secondary" className="text-xs px-3">{plan.badge}</Badge>
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                  <Badge variant="secondary" className="text-xs px-3 shadow-sm whitespace-nowrap">{plan.badge}</Badge>
                 </div>
               )}
-
-              <CardContent className="p-6">
-                <div className="mb-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <h2 className="text-lg font-bold">{plan.name}</h2>
-                  </div>
-                  <div>
-                    <span className="text-3xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground text-sm">{plan.period}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
-                </div>
-
-                <ul className="space-y-2 mb-6">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className={`h-4 w-4 flex-shrink-0 mt-0.5 ${plan.accent ? 'text-primary' : 'text-green-500'}`} />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  className="w-full"
-                  variant={plan.accent ? 'default' : 'outline'}
-                  disabled={isCurrent}
-                >
-                  {isCurrent ? 'Plan actual' : plan.cta}
-                </Button>
-
-                {!isCurrent && plan.key !== 'basic' && (
-                  <p className="text-xs text-center text-muted-foreground mt-2">
-                    Cancela cuando quieras
-                  </p>
+              <Card
+                className={`overflow-hidden h-full flex flex-col ${
+                  isCurrent
+                    ? 'border-primary ring-1 ring-primary'
+                    : plan.accent
+                      ? 'border-primary/40'
+                      : ''
+                }`}
+              >
+                {plan.accent && (
+                  <div className="h-1 bg-gradient-to-r from-primary to-blue-500 w-full flex-shrink-0" />
                 )}
-              </CardContent>
-            </Card>
+
+                <CardContent className="p-6 flex flex-col flex-1">
+                  <div className="mb-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon className="h-5 w-5 text-primary" />
+                      <h2 className="text-lg font-bold">{plan.name}</h2>
+                    </div>
+                    <div>
+                      <span className="text-3xl font-bold">{plan.price}</span>
+                      <span className="text-muted-foreground text-sm">{plan.period}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
+                  </div>
+
+                  <ul className="space-y-2 mb-6 flex-1">
+                    {plan.features.map(f => (
+                      <li key={f} className="flex items-start gap-2 text-sm">
+                        <CheckCircle className={`h-4 w-4 flex-shrink-0 mt-0.5 ${plan.accent ? 'text-primary' : 'text-green-500'}`} />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className="w-full gap-2"
+                    variant={plan.accent ? 'default' : 'outline'}
+                    disabled={isCurrent || isLoading}
+                    onClick={() => {
+                      if (!isCurrent && plan.priceId) handleUpgrade(plan.key, plan.priceId)
+                    }}
+                  >
+                    {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {isCurrent ? 'Plan actual' : isLoading ? 'Redirigiendo...' : plan.cta}
+                  </Button>
+
+                  {!isCurrent && plan.key !== 'basic' && (
+                    <p className="text-xs text-center text-muted-foreground mt-2">
+                      Cancela cuando quieras
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           )
         })}
       </div>

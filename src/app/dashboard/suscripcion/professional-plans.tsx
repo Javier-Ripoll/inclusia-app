@@ -1,6 +1,7 @@
 'use client'
 
-import { CheckCircle, Zap, Star } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle, Zap, Star, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -28,6 +29,28 @@ interface Props {
 
 export function ProfessionalPlans({ currentPlan }: Props) {
   const isPremium = currentPlan === 'premium'
+  const [loading, setLoading] = useState(false)
+
+  async function handleUpgrade() {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PROFESSIONAL_PREMIUM,
+          plan: 'premium',
+          role: 'professional',
+        }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto">
@@ -38,15 +61,16 @@ export function ProfessionalPlans({ currentPlan }: Props) {
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-6">
+      <div className="grid sm:grid-cols-2 gap-6 mt-4 pt-5 items-stretch">
         {/* Free */}
-        <Card className={`relative ${!isPremium ? 'border-primary ring-1 ring-primary' : ''}`}>
+        <div className="relative h-full">
           {!isPremium && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-primary text-white text-xs px-3">Plan actual</Badge>
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+              <Badge className="bg-primary text-white text-xs px-3 shadow-sm whitespace-nowrap">Plan actual</Badge>
             </div>
           )}
-          <CardContent className="p-6">
+          <Card className={`h-full flex flex-col ${!isPremium ? 'border-primary ring-1 ring-primary' : ''}`}>
+          <CardContent className="p-6 flex flex-col flex-1">
             <div className="mb-4">
               <h2 className="text-xl font-bold">Free</h2>
               <div className="mt-2">
@@ -55,7 +79,7 @@ export function ProfessionalPlans({ currentPlan }: Props) {
               </div>
               <p className="text-sm text-muted-foreground mt-1">Para empezar sin compromiso</p>
             </div>
-            <ul className="space-y-2.5 mb-6">
+            <ul className="space-y-2.5 mb-6 flex-1">
               {FREE_FEATURES.map(f => (
                 <li key={f} className="flex items-start gap-2 text-sm">
                   <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
@@ -71,17 +95,19 @@ export function ProfessionalPlans({ currentPlan }: Props) {
               {!isPremium ? 'Plan actual' : 'Volver a Free'}
             </Button>
           </CardContent>
-        </Card>
+          </Card>
+        </div>
 
         {/* Premium */}
-        <Card className={`relative ${isPremium ? 'border-primary ring-1 ring-primary' : 'border-primary/30'}`}>
+        <div className="relative h-full">
           {isPremium && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-primary text-white text-xs px-3">Plan actual</Badge>
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+              <Badge className="bg-primary text-white text-xs px-3 shadow-sm whitespace-nowrap">Plan actual</Badge>
             </div>
           )}
-          <div className="absolute -top-px left-0 right-0 h-1 bg-gradient-to-r from-primary to-blue-500 rounded-t-xl" />
-          <CardContent className="p-6">
+          <Card className={`overflow-hidden h-full flex flex-col ${isPremium ? 'border-primary ring-1 ring-primary' : 'border-primary/30'}`}>
+          <div className="h-1 bg-gradient-to-r from-primary to-blue-500 w-full flex-shrink-0" />
+          <CardContent className="p-6 flex flex-col flex-1">
             <div className="mb-4">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold">Premium</h2>
@@ -93,7 +119,7 @@ export function ProfessionalPlans({ currentPlan }: Props) {
               </div>
               <p className="text-sm text-muted-foreground mt-1">Para profesionales activos</p>
             </div>
-            <ul className="space-y-2.5 mb-6">
+            <ul className="space-y-2.5 mb-6 flex-1">
               {PREMIUM_FEATURES.map(f => (
                 <li key={f} className="flex items-start gap-2 text-sm">
                   <CheckCircle className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
@@ -103,10 +129,11 @@ export function ProfessionalPlans({ currentPlan }: Props) {
             </ul>
             <Button
               className="w-full gap-2"
-              disabled={isPremium}
+              disabled={isPremium || loading}
+              onClick={handleUpgrade}
             >
-              <Zap className="h-4 w-4" />
-              {isPremium ? 'Plan actual' : 'Activar Premium'}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+              {isPremium ? 'Plan actual' : loading ? 'Redirigiendo...' : 'Activar Premium'}
             </Button>
             {!isPremium && (
               <p className="text-xs text-center text-muted-foreground mt-2">
@@ -114,7 +141,8 @@ export function ProfessionalPlans({ currentPlan }: Props) {
               </p>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
 
       {isPremium && (
