@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, X, Bell, ChevronDown } from 'lucide-react'
+import { Menu, X, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { createClient } from '@/lib/supabase/client'
 
 interface NavbarProps {
   user?: { name?: string; avatar?: string; role?: string } | null
@@ -27,9 +28,27 @@ const navLinks = [
   { href: '/precios', label: 'Precios' },
 ]
 
-export function Navbar({ user, unreadCount = 0 }: NavbarProps) {
+export function Navbar({ user: initialUser, unreadCount = 0 }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const router = useRouter()
+  const [user, setUser] = useState(initialUser ?? null)
+
+  useEffect(() => {
+    // If parent already passed user, skip the fetch
+    if (initialUser !== undefined) return
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: { user: authUser } }) => {
+      if (!authUser) return
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, role')
+        .eq('id', authUser.id)
+        .single()
+      if (profile) {
+        setUser({ name: profile.full_name ?? authUser.email ?? 'Usuario', role: profile.role })
+      }
+    })
+  }, [])
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-border">
@@ -87,7 +106,7 @@ export function Navbar({ user, unreadCount = 0 }: NavbarProps) {
                     <DropdownMenuItem onClick={() => router.push('/dashboard')}>
                       Mi Panel
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/dashboard/perfil')}>
+                    <DropdownMenuItem onClick={() => router.push(user?.role === 'company' ? '/dashboard/empresa' : '/dashboard/perfil')}>
                       Mi Perfil
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => router.push('/dashboard/suscripcion')}>
