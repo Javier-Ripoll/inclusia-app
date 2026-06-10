@@ -101,24 +101,6 @@ export function OffersFilters({ total, filtered }: Props) {
           </select>
         </div>
 
-        {/* Especialización */}
-        <div className="relative">
-          <select
-            value={especialidad}
-            onChange={e => update('especialidad', e.target.value || null)}
-            className={`appearance-none pl-3 pr-7 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
-              especialidad
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-muted-foreground border-border hover:border-primary/50'
-            }`}
-          >
-            <option value="">Especialización</option>
-            {SPECIALIZATIONS.map(s => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
-        </div>
-
         {/* Tipo contrato */}
         <div className="relative">
           <select
