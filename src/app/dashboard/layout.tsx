@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { NotificationsProvider } from '@/components/notifications/notifications-provider'
 import { NotificationBell } from '@/components/notifications/notification-bell'
+import { UnreadMessagesBadge } from '@/components/chat/unread-messages-badge'
 import {
   LayoutDashboard, User, Briefcase, Users, Bell, CreditCard,
   MessageSquare, LogOut
@@ -32,6 +33,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(30)
+
+  // Count unread messages (sent by others, not yet read)
+  const { count: unreadMessages } = await supabase
+    .from('messages')
+    .select('id', { count: 'exact', head: true })
+    .is('read_at', null)
+    .neq('sender_id', user.id)
 
   const navItems = isProfessional
     ? [
@@ -73,6 +81,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
               >
                 <item.icon className="h-5 w-5" />
                 {item.label}
+                {item.href === '/dashboard/chat' && (
+                  <UnreadMessagesBadge
+                    initialCount={unreadMessages ?? 0}
+                    userId={user.id}
+                  />
+                )}
               </Link>
             ))}
           </nav>
