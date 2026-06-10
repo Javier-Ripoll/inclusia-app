@@ -35,7 +35,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
     .select(`
       *,
       professional_profiles(
-        id, bio, years_experience, specializations, availabilities, is_available, available_immediately,
+        id, user_id, bio, years_experience, specializations, availabilities, is_available, available_immediately,
         profiles(full_name, city, province, phone)
       )
     `)
@@ -159,7 +159,13 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
                         )}
 
                         <div className="flex items-center gap-2 flex-wrap">
-                          <ApplicationActions applicationId={app.id} currentStatus={app.status} phone={profileData?.phone} />
+                          <ApplicationActions
+                            applicationId={app.id}
+                            currentStatus={app.status}
+                            phone={profileData?.phone}
+                            professionalUserId={prof?.user_id}
+                            offerTitle={offer.title}
+                          />
                           <StartChatButton
                             offerId={id}
                             companyId={company.id}

@@ -10,9 +10,11 @@ interface Props {
   applicationId: string
   currentStatus: string
   phone?: string | null
+  professionalUserId?: string | null
+  offerTitle?: string | null
 }
 
-export function ApplicationActions({ applicationId, currentStatus, phone }: Props) {
+export function ApplicationActions({ applicationId, currentStatus, phone, professionalUserId, offerTitle }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
 
@@ -23,6 +25,25 @@ export function ApplicationActions({ applicationId, currentStatus, phone }: Prop
       .from('applications')
       .update({ status, viewed_at: status === 'reviewed' ? new Date().toISOString() : undefined })
       .eq('id', applicationId)
+
+    // Notify the professional when accepted or rejected (via service-role API route)
+    if (professionalUserId && offerTitle && (status === 'accepted' || status === 'rejected')) {
+      const isAccepted = status === 'accepted'
+      fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: professionalUserId,
+          type: isAccepted ? 'application_accepted' : 'application_rejected',
+          title: isAccepted ? '¡Candidatura aceptada!' : 'Candidatura no seleccionada',
+          body: isAccepted
+            ? `Has sido seleccionado/a para "${offerTitle}". El centro se pondrá en contacto contigo.`
+            : `Tu candidatura para "${offerTitle}" no ha sido seleccionada esta vez.`,
+          data: { application_id: applicationId },
+        }),
+      })
+    }
+
     setLoading(null)
     router.refresh()
   }

@@ -22,7 +22,7 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
 
   const { data: offer } = await supabase
     .from('job_offers')
-    .select('*, company_profiles(company_name, description, logo_url, verified)')
+    .select('*, company_profiles(id, company_name, description, logo_url, verified)')
     .eq('id', id)
     .eq('status', 'active')
     .single()
@@ -161,12 +161,22 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
             <Card>
               <CardContent className="p-5">
                 <p className="text-xs text-muted-foreground mb-2">Centro / Entidad</p>
-                <p className="font-semibold flex items-center gap-1">
+                <Link
+                  href={`/centros/${company?.id}`}
+                  className="font-semibold flex items-center gap-1 hover:text-primary transition-colors"
+                >
                   {company?.company_name}
-                  {company?.verified && <span className="text-blue-500 text-sm">✓</span>}
-                </p>
-                {offer.city && <p className="text-sm text-muted-foreground">{offer.city}{offer.province ? `, ${offer.province}` : ''}</p>}
+                  {company?.verified && <CheckCircle className="h-3.5 w-3.5 text-primary flex-shrink-0" />}
+                </Link>
+                {offer.city && <p className="text-sm text-muted-foreground mt-0.5">{offer.city}{offer.province ? `, ${offer.province}` : ''}</p>}
                 {company?.description && <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{company.description}</p>}
+                {company?.id && (
+                  <Link href={`/centros/${company.id}`} className="block mt-3">
+                    <Button variant="outline" size="sm" className="w-full text-xs gap-1">
+                      <Building2 className="h-3.5 w-3.5" /> Ver perfil del centro
+                    </Button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           </div>

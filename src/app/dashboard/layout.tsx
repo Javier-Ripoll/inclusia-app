@@ -23,8 +23,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!user) redirect('/auth/login')
 
   const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-  const profile = profileData as { full_name: string | null; role: string } | null
+  const profile = profileData as { full_name: string | null; role: string; onboarding_completed: boolean } | null
   const isProfessional = profile?.role === 'professional'
+
+  // Redirect to onboarding if not completed yet
+  if (profile && !profile.onboarding_completed) redirect('/onboarding')
 
   // Load initial notifications (last 30)
   const { data: initialNotifications } = await supabase
