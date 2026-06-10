@@ -22,7 +22,7 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
 
   const { data: offer } = await supabase
     .from('job_offers')
-    .select('*, company_profiles(company_name, description, logo_url, verified, city)')
+    .select('*, company_profiles(company_name, description, logo_url, verified)')
     .eq('id', id)
     .eq('status', 'active')
     .single()
@@ -165,7 +165,7 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
                   {company?.company_name}
                   {company?.verified && <span className="text-blue-500 text-sm">✓</span>}
                 </p>
-                {company?.city && <p className="text-sm text-muted-foreground">{company.city}</p>}
+                {offer.city && <p className="text-sm text-muted-foreground">{offer.city}{offer.province ? `, ${offer.province}` : ''}</p>}
                 {company?.description && <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{company.description}</p>}
               </CardContent>
             </Card>
