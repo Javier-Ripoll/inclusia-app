@@ -11,7 +11,8 @@ import {
   GraduationCap, Star, CheckCircle, Zap
 } from 'lucide-react'
 
-export default async function OfferDetailPage({ params }: { params: { id: string } }) {
+export default async function OfferDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -22,7 +23,7 @@ export default async function OfferDetailPage({ params }: { params: { id: string
   const { data: offer } = await supabase
     .from('job_offers')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('company_id', company.id)
     .single()
 
@@ -37,7 +38,7 @@ export default async function OfferDetailPage({ params }: { params: { id: string
         profiles(full_name, city, province, phone)
       )
     `)
-    .eq('offer_id', params.id)
+    .eq('offer_id', id)
     .order('created_at', { ascending: false })
 
   const statusCount = {

@@ -16,13 +16,14 @@ const AVAILABILITY_LABELS: Record<string, string> = {
   weekends: 'Fines de semana', on_call: 'A llamada',
 }
 
-export default async function OfferPublicPage({ params }: { params: { id: string } }) {
+export default async function OfferPublicPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
 
   const { data: offer } = await supabase
     .from('job_offers')
     .select('*, company_profiles(company_name, description, logo_url, verified, city)')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('status', 'active')
     .single()
 
@@ -41,7 +42,7 @@ export default async function OfferPublicPage({ params }: { params: { id: string
     if (prof) {
       const { data: existing } = await supabase
         .from('applications')
-        .select('id').eq('offer_id', params.id).eq('professional_id', prof.id).single()
+        .select('id').eq('offer_id', id).eq('professional_id', prof.id).single()
       alreadyApplied = !!existing
     }
   }
@@ -148,7 +149,7 @@ export default async function OfferPublicPage({ params }: { params: { id: string
                 )}
 
                 <ApplyButton
-                  offerId={params.id}
+                  offerId={id}
                   professionalProfileId={professionalProfileId}
                   alreadyApplied={alreadyApplied}
                   isLoggedIn={!!user}

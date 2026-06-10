@@ -25,7 +25,8 @@ const AVAILABILITY_LABELS: Record<string, string> = {
   weekends: 'Fines de semana', on_call: 'A llamada',
 }
 
-export default async function ProfessionalPublicPage({ params }: { params: { id: string } }) {
+export default async function ProfessionalPublicPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
 
   // Load professional profile + base profile
@@ -36,7 +37,7 @@ export default async function ProfessionalPublicPage({ params }: { params: { id:
       is_available, available_immediately, languages, cv_url, plan,
       profiles ( full_name, city, province, phone )
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!prof) notFound()
