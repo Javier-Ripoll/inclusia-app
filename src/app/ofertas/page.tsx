@@ -1,11 +1,11 @@
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { MapPin, Clock, Briefcase, Search, SlidersHorizontal, Zap } from 'lucide-react'
+import { MapPin, Clock, Briefcase, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { Suspense } from 'react'
+import { OffersFilters } from './offers-filters'
 
 // Demo offers shown before Supabase is connected
 const DEMO_OFFERS = [
@@ -95,7 +95,15 @@ const DEMO_OFFERS = [
   },
 ]
 
-async function getOffers() {
+interface Filters {
+  q?: string
+  urgente?: boolean
+  provincia?: string
+  especialidad?: string
+  tipo?: string
+}
+
+async function getOffers(filters: Filters = {}) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!supabaseUrl || supabaseUrl === 'your_supabase_project_url' || !supabaseAnonKey) {
@@ -103,24 +111,37 @@ async function getOffers() {
   }
 
   try {
-    // Use direct REST fetch — works in static/ISR context without cookies
     const url = new URL(`${supabaseUrl}/rest/v1/job_offers`)
     url.searchParams.set('select', '*,company_profiles(company_name,logo_url,verified)')
     url.searchParams.set('status', 'eq.active')
     url.searchParams.set('order', 'is_urgent.desc,created_at.desc')
-    url.searchParams.set('limit', '30')
+    url.searchParams.set('limit', '50')
+
+    if (filters.urgente)    url.searchParams.set('is_urgent', 'eq.true')
+    if (filters.provincia)  url.searchParams.set('province',  `ilike.*${filters.provincia}*`)
+    if (filters.tipo)       url.searchParams.set('contract_type', `ilike.*${filters.tipo}*`)
+    if (filters.especialidad) url.searchParams.set('required_specializations', `cs.{"${filters.especialidad}"}`)
 
     const res = await fetch(url.toString(), {
-      headers: {
-        apikey: supabaseAnonKey,
-        Authorization: `Bearer ${supabaseAnonKey}`,
-      },
-      next: { revalidate: 60 },
+      headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${supabaseAnonKey}` },
+      cache: 'no-store',
     })
 
     if (!res.ok) return { offers: DEMO_OFFERS, isDemo: true }
-    const data = await res.json()
-    return { offers: data ?? [], isDemo: false }
+    let data: any[] = await res.json()
+
+    // Text search (client-side on returned results)
+    if (filters.q) {
+      const q = filters.q.toLowerCase()
+      data = data.filter(o =>
+        o.title?.toLowerCase().includes(q) ||
+        o.city?.toLowerCase().includes(q) ||
+        o.description?.toLowerCase().includes(q) ||
+        o.company_profiles?.company_name?.toLowerCase().includes(q)
+      )
+    }
+
+    return { offers: data, isDemo: false }
   } catch {
     return { offers: DEMO_OFFERS, isDemo: true }
   }
@@ -135,8 +156,17 @@ function timeAgo(dateStr: string) {
   return `hace ${Math.floor(hours / 24)}d`
 }
 
-export default async function OffersPage() {
-  const { offers, isDemo } = await getOffers()
+export default async function OffersPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
+  const sp = await searchParams
+  const filters: Filters = {
+    q:           sp.q || undefined,
+    urgente:     sp.urgente === '1',
+    provincia:   sp.provincia || undefined,
+    especialidad: sp.especialidad || undefined,
+    tipo:        sp.tipo || undefined,
+  }
+
+  const { offers, isDemo } = await getOffers(filters)
   const urgentCount = offers.filter((o: any) => o.is_urgent).length
 
   return (
@@ -151,11 +181,11 @@ export default async function OffersPage() {
                 Vista previa con datos de ejemplo — conecta Supabase para ver ofertas reales
               </div>
             )}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-2xl font-bold">Ofertas de apoyo educativo</h1>
                 <p className="text-muted-foreground">
-                  {offers.length} ofertas disponibles
+                  {offers.length} oferta{offers.length !== 1 ? 's' : ''} disponible{offers.length !== 1 ? 's' : ''}
                   {urgentCount > 0 && (
                     <span className="ml-2 text-red-600 font-medium">· {urgentCount} urgentes</span>
                   )}
@@ -163,16 +193,9 @@ export default async function OffersPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Buscar por especialidad, ciudad..." className="pl-9" />
-              </div>
-              <Button variant="outline" className="gap-2">
-                <SlidersHorizontal className="h-4 w-4" />
-                Filtros
-              </Button>
-            </div>
+            <Suspense>
+              <OffersFilters total={offers.length} filtered={offers.length} />
+            </Suspense>
           </div>
         </div>
 
