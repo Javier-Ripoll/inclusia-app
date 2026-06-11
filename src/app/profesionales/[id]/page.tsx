@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -29,8 +30,14 @@ export default async function ProfessionalPublicPage({ params }: { params: Promi
   const { id } = await params
   const supabase = await createClient()
 
+  // Service role para leer datos públicos del profesional sin restricciones RLS
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   // Load professional profile + base profile
-  const { data: prof } = await supabase
+  const { data: prof } = await serviceSupabase
     .from('professional_profiles')
     .select(`
       id, bio, years_experience, specializations, availabilities,
@@ -46,10 +53,10 @@ export default async function ProfessionalPublicPage({ params }: { params: Promi
 
   // Education & experience
   const [{ data: education }, { data: experience }] = await Promise.all([
-    supabase.from('professional_education')
+    serviceSupabase.from('professional_education')
       .select('*').eq('professional_id', prof.id)
       .order('year_completed', { ascending: false }),
-    supabase.from('professional_experience')
+    serviceSupabase.from('professional_experience')
       .select('*').eq('professional_id', prof.id)
       .order('start_date', { ascending: false }),
   ])
