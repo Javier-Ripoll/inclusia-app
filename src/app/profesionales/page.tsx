@@ -29,7 +29,7 @@ async function getProfessionals() {
       is_available, available_immediately, plan,
       profiles(full_name, city, province)
     `)
-    .eq('is_available', true)
+    .order('is_available', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(24)
   return data ?? []
