@@ -84,6 +84,9 @@ export function OnboardingWizard({ role, name, professionalProfileId, companyPro
     setSaving(true)
     const supabase = createClient()
 
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
     if (isProfessional && professionalProfileId) {
       await supabase.from('professional_profiles').update({
         specializations,
@@ -96,27 +99,23 @@ export function OnboardingWizard({ role, name, professionalProfileId, companyPro
     }
 
     if (!isProfessional && companyProfileId) {
-      await Promise.all([
-        supabase.from('company_profiles').update({
-          company_type: companyType || null,
-          description: description || null,
-        }).eq('id', companyProfileId),
-        supabase.from('profiles').update({
-          city: city || null,
-          province: province || null,
-          phone: phone || null,
-          onboarding_completed: true,
-        }),
-      ])
+      await supabase.from('company_profiles').update({
+        company_type: companyType || null,
+        description: description || null,
+      }).eq('id', companyProfileId)
+
+      await supabase.from('profiles').update({
+        city: city || null,
+        province: province || null,
+        phone: phone || null,
+      }).eq('id', user.id)
     }
 
-    // Mark onboarding as done for professionals too
-    if (isProfessional) {
-      await supabase.from('profiles').update({ onboarding_completed: true })
-    }
+    // Mark onboarding as done
+    await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
 
     setSaving(false)
-    router.push('/dashboard')
+    window.location.href = '/dashboard'
   }
 
   /* ─── PROFESSIONAL STEPS ─── */
@@ -348,8 +347,11 @@ export function OnboardingWizard({ role, name, professionalProfileId, companyPro
               } else {
                 // Skip onboarding — mark as completed so no redirect loop
                 const supabase = createClient()
-                await supabase.from('profiles').update({ onboarding_completed: true })
-                router.push('/dashboard')
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                  await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
+                }
+                window.location.href = '/dashboard'
               }
             }}
             className="gap-1 text-muted-foreground"
