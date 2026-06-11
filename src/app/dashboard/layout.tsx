@@ -148,12 +148,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
             >
               <div className="relative">
                 <item.icon className="h-5 w-5" />
-                {item.href === '/dashboard/chat' && (
-                  <UnreadMessagesBadge
-                    initialCount={unreadMessages ?? 0}
-                    userId={user.id}
-                  />
-                )}
+                {item.href === '/dashboard/chat' && unreadMessages ? (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {unreadMessages > 9 ? '9+' : unreadMessages}
+                  </span>
+                ) : null}
               </div>
               <span className="text-[10px] font-medium truncate max-w-[56px] text-center leading-tight">
                 {item.label}
