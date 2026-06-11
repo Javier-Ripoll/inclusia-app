@@ -9,6 +9,7 @@ import { StartChatButton } from '@/app/dashboard/ofertas/[id]/start-chat-button'
 import {
   Users, MapPin, Star, Clock, CheckCircle, Zap, Briefcase
 } from 'lucide-react'
+import { BackButton } from '@/components/ui/back-button'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pendiente',
@@ -79,6 +80,7 @@ export default async function CandidatosPage({
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
+      <BackButton href="/dashboard" label="Panel" />
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Users className="h-6 w-6" />

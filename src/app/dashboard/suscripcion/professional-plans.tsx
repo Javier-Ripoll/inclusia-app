@@ -5,6 +5,7 @@ import { CheckCircle, Zap, Star, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { BackButton } from '@/components/ui/back-button'
 
 const FREE_FEATURES = [
   'Perfil profesional completo',
@@ -54,6 +55,7 @@ export function ProfessionalPlans({ currentPlan }: Props) {
 
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      <BackButton href="/dashboard" label="Panel" />
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold mb-2">Tu suscripción</h1>
         <p className="text-muted-foreground">
