@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 
 const SPECIALIZATIONS = [
-  'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
+  'PATI', 'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
   'Terapia Ocupacional', 'Logopedia', 'Educación Infantil', 'Psicología Educativa',
 ]
 
@@ -88,10 +88,10 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/auth/registro?rol=profesional">
-                <Button size="lg" variant="outline" className="gap-2 text-base px-8">
+                <button className="inline-flex items-center gap-2 px-8 text-base font-medium h-11 rounded-lg border-2 border-primary text-primary bg-transparent hover:bg-primary/5 transition-colors">
                   <GraduationCap className="h-5 w-5" />
                   Soy un profesional
-                </Button>
+                </button>
               </Link>
             </div>
             <div className="flex flex-wrap gap-2 justify-center mt-10">
@@ -256,7 +256,7 @@ export default function HomePage() {
                 <Link href="/auth/registro?rol=empresa">
                   <Button size="lg" className="gap-2">
                     <Building2 className="h-5 w-5" />
-                    Empezar – desde 49€/mes
+                    Empezar – gratis o desde 49€/mes
                   </Button>
                 </Link>
               </div>
@@ -289,8 +289,8 @@ export default function HomePage() {
                 <CardHeader>
                   <Badge className="w-fit mx-auto mb-2">Centros y entidades</Badge>
                   <CardTitle className="text-2xl">
-                    49–199€
-                    <span className="text-sm font-normal text-muted-foreground">/mes</span>
+                    Gratis
+                    <span className="text-sm font-normal text-muted-foreground"> o hasta 99€/mes</span>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">Publicación ilimitada + matching IA + cobertura urgente</p>
                 </CardHeader>
@@ -321,10 +321,10 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/auth/registro?rol=profesional">
-                <Button size="lg" variant="outline" className="gap-2 px-8 border-white text-white hover:bg-white/10">
+                <button className="inline-flex items-center gap-2 px-8 text-base font-medium h-11 rounded-lg border-2 border-white text-white bg-transparent hover:bg-white/15 transition-colors">
                   <GraduationCap className="h-5 w-5" />
                   Soy un profesional
-                </Button>
+                </button>
               </Link>
             </div>
           </div>

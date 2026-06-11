@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 
 const SPEC_LABELS: Record<string, string> = {
-  tea: 'TEA', tdah: 'TDAH', altas_capacidades: 'Altas capacidades',
+  pati: 'PATI', tea: 'TEA', tdah: 'TDAH', altas_capacidades: 'Altas capacidades',
   discapacidad_motora: 'Discapacidad motora',
   discapacidad_intelectual: 'Discapacidad intelectual',
   dificultades_aprendizaje: 'Dificultades de aprendizaje',

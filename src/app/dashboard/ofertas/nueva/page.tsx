@@ -15,7 +15,7 @@ import { Loader2, Zap, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 const SPECIALIZATIONS = [
-  'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
+  'PATI', 'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
   'Terapia Ocupacional', 'Logopedia', 'Educación Infantil', 'Psicología Educativa',
   'Educación Especial', 'Fisioterapia', 'Monitor de Ocio y Tiempo Libre',
 ]

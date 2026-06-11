@@ -12,6 +12,7 @@ import { Loader2, CheckCircle, ArrowRight, ArrowLeft, Zap, GraduationCap, Buildi
 
 /* ── PROFESSIONAL CONSTANTS ── */
 const SPECIALIZATIONS = [
+  { value: 'pati', label: 'PATI' },
   { value: 'tea', label: 'TEA' },
   { value: 'tdah', label: 'TDAH' },
   { value: 'altas_capacidades', label: 'Altas capacidades' },

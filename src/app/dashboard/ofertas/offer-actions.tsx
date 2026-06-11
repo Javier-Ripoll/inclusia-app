@@ -2,14 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { MoreVertical, XCircle, Trash2, CheckCircle, Loader2 } from 'lucide-react'
+import { XCircle, Trash2, CheckCircle, Loader2 } from 'lucide-react'
 
 interface Props {
   offerId: string
@@ -20,55 +14,48 @@ export function OfferActions({ offerId, currentStatus }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleClose = async () => {
-    setLoading('close')
-    const supabase = createClient()
-    await supabase.from('job_offers').update({ status: 'closed' }).eq('id', offerId)
-    setLoading(null)
-    router.refresh()
-  }
-
-  const handleReopen = async () => {
-    setLoading('reopen')
-    const supabase = createClient()
-    await supabase.from('job_offers').update({ status: 'active' }).eq('id', offerId)
-    setLoading(null)
-    router.refresh()
-  }
-
-  const handleDelete = async () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true)
-      return
+  const updateOffer = async (action: 'close' | 'reopen' | 'delete') => {
+    setLoading(action)
+    setError(null)
+    try {
+      const res = await fetch(`/api/ofertas/${offerId}`, {
+        method: action === 'delete' ? 'DELETE' : 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: action !== 'delete'
+          ? JSON.stringify({ status: action === 'close' ? 'closed' : 'active' })
+          : undefined,
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Error al actualizar la oferta')
+        return
+      }
+      setConfirmDelete(false)
+      router.refresh()
+    } catch {
+      setError('Error de conexión')
+    } finally {
+      setLoading(null)
     }
-    setLoading('delete')
-    const supabase = createClient()
-    await supabase.from('job_offers').delete().eq('id', offerId)
-    setLoading(null)
-    router.refresh()
   }
 
   if (confirmDelete) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground">¿Seguro?</span>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-xs text-muted-foreground">¿Eliminar definitivamente?</span>
         <Button
           size="sm"
           variant="destructive"
           className="h-7 text-xs px-2 gap-1"
           disabled={loading === 'delete'}
-          onClick={handleDelete}
+          onClick={() => updateOffer('delete')}
         >
           {loading === 'delete' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-          Eliminar
+          Sí, eliminar
         </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-7 text-xs px-2"
-          onClick={() => setConfirmDelete(false)}
-        >
+        <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={() => setConfirmDelete(false)}>
           Cancelar
         </Button>
       </div>
@@ -76,36 +63,43 @@ export function OfferActions({ offerId, currentStatus }: Props) {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-gray-100 transition-colors disabled:opacity-50" disabled={!!loading}>
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreVertical className="h-4 w-4" />}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        {currentStatus === 'active' ? (
-          <button
-            onClick={handleClose}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-sm hover:bg-gray-100 text-muted-foreground"
-          >
-            <XCircle className="h-4 w-4" />
-            Cerrar oferta
-          </button>
-        ) : (
-          <button
-            onClick={handleReopen}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-sm hover:bg-gray-100 text-muted-foreground"
-          >
-            <CheckCircle className="h-4 w-4" />
-            Reactivar oferta
-          </button>
-        )}
-        <button
-          onClick={handleDelete}
-          className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-sm hover:bg-red-50 text-red-600"
+    <div className="flex items-center gap-2 flex-wrap">
+      {error && <span className="text-xs text-red-500">{error}</span>}
+
+      {currentStatus === 'active' ? (
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-7 text-xs px-2 gap-1 text-muted-foreground"
+          disabled={!!loading}
+          onClick={() => updateOffer('close')}
         >
-          <Trash2 className="h-4 w-4" />
-          Eliminar oferta
-        </button>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {loading === 'close' ? <Loader2 className="h-3 w-3 animate-spin" /> : <XCircle className="h-3 w-3" />}
+          Cerrar oferta
+        </Button>
+      ) : (
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-7 text-xs px-2 gap-1 text-muted-foreground"
+          disabled={!!loading}
+          onClick={() => updateOffer('reopen')}
+        >
+          {loading === 'reopen' ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
+          Reactivar
+        </Button>
+      )}
+
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-7 text-xs px-2 gap-1 text-red-500 hover:text-red-600 hover:bg-red-50"
+        disabled={!!loading}
+        onClick={() => setConfirmDelete(true)}
+      >
+        <Trash2 className="h-3 w-3" />
+        Eliminar
+      </Button>
+    </div>
   )
 }

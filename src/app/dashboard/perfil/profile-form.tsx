@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 const SPECIALIZATIONS = [
-  'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
+  'PATI', 'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
   'Terapia Ocupacional', 'Logopedia', 'Educación Infantil', 'Psicología Educativa',
   'Educación Especial', 'Fisioterapia', 'Monitor de Ocio y Tiempo Libre',
   'Técnico en Animación Sociocultural', 'Trabajo Social',

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Search, Zap, X } from 'lucide-react'
 
 const SPECIALIZATIONS = [
+  { value: 'pati', label: 'PATI' },
   { value: 'tea', label: 'TEA' },
   { value: 'tdah', label: 'TDAH' },
   { value: 'altas_capacidades', label: 'Altas capacidades' },
