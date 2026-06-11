@@ -117,10 +117,51 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pb-20 md:pb-0">
+          {/* Mobile top bar */}
+          <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b sticky top-0 z-10">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-white font-bold text-xs">I</span>
+              </div>
+              <span className="font-bold text-lg text-primary">Inclusia</span>
+            </Link>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs">{profile?.full_name?.charAt(0) ?? 'U'}</AvatarFallback>
+              </Avatar>
+            </div>
+          </div>
           {children}
         </main>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-20">
+        <div className="flex items-center justify-around px-2 py-1">
+          {navItems.slice(0, 5).map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center gap-0.5 px-2 py-2 text-muted-foreground hover:text-primary transition-colors min-w-0"
+            >
+              <div className="relative">
+                <item.icon className="h-5 w-5" />
+                {item.href === '/dashboard/chat' && (
+                  <UnreadMessagesBadge
+                    initialCount={unreadMessages ?? 0}
+                    userId={user.id}
+                  />
+                )}
+              </div>
+              <span className="text-[10px] font-medium truncate max-w-[56px] text-center leading-tight">
+                {item.label}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </nav>
     </NotificationsProvider>
   )
 }
