@@ -11,6 +11,7 @@ import {
   LayoutDashboard, User, Briefcase, Users, Bell, CreditCard,
   MessageSquare, LogOut
 } from 'lucide-react'
+import { LogoutButton } from '@/components/layout/logout-button'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -107,12 +108,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </div>
               <NotificationBell />
             </div>
-            <Link href="/auth/logout">
-              <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground">
-                <LogOut className="h-4 w-4" />
-                Cerrar sesión
-              </Button>
-            </Link>
+            <LogoutButton />
           </div>
         </aside>
 
