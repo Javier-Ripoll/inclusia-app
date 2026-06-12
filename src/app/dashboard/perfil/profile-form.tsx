@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import {
   Loader2, Plus, Trash2, CheckCircle, User, Briefcase,
-  GraduationCap, MapPin, Clock, Star
+  GraduationCap, MapPin, Clock, Star, Upload, FileText, X
 } from 'lucide-react'
 
 const SPECIALIZATIONS = [
@@ -39,9 +39,10 @@ interface Props {
   professionalProfile: any
   education: any[]
   experience: any[]
+  cvUrl?: string | null
 }
 
-export function ProfessionalProfileForm({ profile, professionalProfile, education, experience }: Props) {
+export function ProfessionalProfileForm({ profile, professionalProfile, education, experience, cvUrl: initialCvUrl }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -49,6 +50,12 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
   const [addingEdu, setAddingEdu] = useState(false)
   const [addingExp, setAddingExp] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
+
+  // CV — stores signed URL for display; path stored in DB
+  const [cvUrl, setCvUrl] = useState<string | null>(initialCvUrl ?? null)
+  const [cvPath, setCvPath] = useState<string | null>(professionalProfile?.cv_url ?? null)
+  const [uploadingCv, setUploadingCv] = useState(false)
+  const [cvError, setCvError] = useState<string | null>(null)
 
   // Personal info
   const [fullName, setFullName] = useState(profile?.full_name ?? '')
@@ -92,6 +99,47 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
     yearsExp > 0, educationList.length > 0, experienceList.length > 0,
   ]
   const completion = Math.round((completionItems.filter(Boolean).length / completionItems.length) * 100)
+
+  const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setCvError('El archivo no puede superar 5 MB.')
+      return
+    }
+    setUploadingCv(true)
+    setCvError(null)
+    const supabase = createClient()
+    const ext = file.name.split('.').pop()
+    const path = `${profile.id}/cv.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('cvs')
+      .upload(path, file, { upsert: true })
+    if (uploadError) {
+      setCvError('Error al subir el CV. Inténtalo de nuevo.')
+      setUploadingCv(false)
+      return
+    }
+    const { data: signedData } = await supabase.storage.from('cvs').createSignedUrl(path, 60 * 60 * 24)
+    await supabase.from('professional_profiles')
+      .update({ cv_url: path })
+      .eq('user_id', profile.id)
+    setCvPath(path)
+    setCvUrl(signedData?.signedUrl ?? null)
+    setUploadingCv(false)
+  }
+
+  const handleCvDelete = async () => {
+    const supabase = createClient()
+    if (cvPath) {
+      await supabase.storage.from('cvs').remove([cvPath])
+    }
+    await supabase.from('professional_profiles')
+      .update({ cv_url: null })
+      .eq('user_id', profile.id)
+    setCvPath(null)
+    setCvUrl(null)
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -309,6 +357,45 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
                   ))}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4" /> Currículum (CV)</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              {cvError && (
+                <p className="text-sm text-destructive">{cvError}</p>
+              )}
+              {cvUrl ? (
+                <div className="flex items-center gap-3 p-3 border rounded-lg bg-green-50 border-green-200">
+                  <FileText className="h-5 w-5 text-green-600 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-green-700">CV subido correctamente</p>
+                    <a href={cvUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-green-600 hover:underline">
+                      Ver CV
+                    </a>
+                  </div>
+                  <button onClick={handleCvDelete} className="text-muted-foreground hover:text-destructive transition-colors">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className={`flex flex-col items-center gap-2 p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${uploadingCv ? 'border-primary/40 bg-primary/5' : 'border-border hover:border-primary/40 hover:bg-primary/5'}`}>
+                  {uploadingCv
+                    ? <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    : <Upload className="h-8 w-8 text-muted-foreground" />
+                  }
+                  <span className="text-sm font-medium">{uploadingCv ? 'Subiendo...' : 'Haz clic para subir tu CV'}</span>
+                  <span className="text-xs text-muted-foreground">PDF o Word · máximo 5 MB</span>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    disabled={uploadingCv}
+                    onChange={handleCvUpload}
+                  />
+                </label>
+              )}
             </CardContent>
           </Card>
 

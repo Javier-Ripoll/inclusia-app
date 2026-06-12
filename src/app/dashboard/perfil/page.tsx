@@ -22,6 +22,15 @@ export default async function ProfilePage() {
 
   if (profile?.role !== 'professional') redirect('/dashboard')
 
+  // Generate signed URL for CV if exists (bucket is private)
+  let cvSignedUrl: string | null = null
+  if (professionalProfile?.cv_url) {
+    const { data } = await supabase.storage
+      .from('cvs')
+      .createSignedUrl(professionalProfile.cv_url, 60 * 60 * 24) // 24h
+    cvSignedUrl = data?.signedUrl ?? null
+  }
+
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto">
       <BackButton href="/dashboard" label="Panel" />
@@ -34,6 +43,7 @@ export default async function ProfilePage() {
         professionalProfile={professionalProfile}
         education={education ?? []}
         experience={experience ?? []}
+        cvUrl={cvSignedUrl}
       />
     </div>
   )
