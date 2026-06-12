@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { CompanyProfileForm } from './company-profile-form'
+import { BackButton } from '@/components/ui/back-button'
 
 export default async function CompanyProfilePage() {
   const supabase = await createClient()
@@ -16,6 +17,7 @@ export default async function CompanyProfilePage() {
 
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      <BackButton href="/dashboard" label="Panel" />
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Perfil del centro</h1>
         <p className="text-muted-foreground">
