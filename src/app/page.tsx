@@ -39,7 +39,7 @@ const STATS = [
   { value: '<30 min', label: 'Tiempo medio de cobertura' },
   { value: '500+', label: 'Profesionales activos' },
   { value: '95%', label: 'Tasa de éxito en urgencias' },
-  { value: '3 provincias', label: 'Cobertura y creciendo' },
+  { value: 'Toda España', label: 'Cobertura nacional' },
 ]
 
 const PROFESSIONAL_FEATURES = [
