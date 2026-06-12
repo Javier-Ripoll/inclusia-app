@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { strictLimiter, getIp } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
+  const { success } = await strictLimiter.limit(getIp(req))
+  if (!success) {
+    return NextResponse.json({ error: 'Demasiadas solicitudes. Inténtalo más tarde.' }, { status: 429 })
+  }
+
   const { nombre, email, tipo, mensaje } = await req.json()
 
   if (!nombre || !email || !mensaje) {
