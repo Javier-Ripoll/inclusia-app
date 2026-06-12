@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,6 +9,18 @@ import {
   Zap, Users, Brain, MapPin, Bell, Star, Clock, Shield,
   CheckCircle, ArrowRight, Building2, GraduationCap
 } from 'lucide-react'
+
+async function getStats() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const [{ count: professionals }, { count: companies }] = await Promise.all([
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'professional'),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'company'),
+  ])
+  return { professionals: professionals ?? 0, companies: companies ?? 0 }
+}
 
 const SPECIALIZATIONS = [
   'PATI', 'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
@@ -35,12 +48,6 @@ const HOW_IT_WORKS = [
   },
 ]
 
-const STATS = [
-  { value: '<30 min', label: 'Tiempo medio de cobertura' },
-  { value: '500+', label: 'Profesionales activos' },
-  { value: '95%', label: 'Tasa de éxito en urgencias' },
-  { value: 'Toda España', label: 'Cobertura nacional' },
-]
 
 const PROFESSIONAL_FEATURES = [
   { icon: Bell, text: 'Alertas instantáneas de nuevas ofertas' },
@@ -60,7 +67,16 @@ const COMPANY_FEATURES = [
   { icon: Shield, text: 'Dashboard de métricas de contratación' },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const stats = await getStats()
+
+  const STATS = [
+    { value: '<30 min', label: 'Tiempo medio de cobertura' },
+    { value: `${stats.professionals}+`, label: 'Profesionales activos' },
+    { value: '95%', label: 'Tasa de éxito en urgencias' },
+    { value: 'Toda España', label: 'Cobertura nacional' },
+  ]
+
   return (
     <>
       <Navbar />
