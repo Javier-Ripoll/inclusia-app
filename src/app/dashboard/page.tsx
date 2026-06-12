@@ -6,13 +6,16 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Briefcase, Users, TrendingUp, Plus, ArrowRight,
-  Clock, CheckCircle, MessageSquare, Zap
+  Clock, CheckCircle, MessageSquare, Zap, BarChart2
 } from 'lucide-react'
+
+const ADMIN_EMAIL = 'javier2003.jr@gmail.com'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+  const isAdmin = user.email === ADMIN_EMAIL
 
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
   const isProfessional = profile?.role === 'professional'
@@ -67,13 +70,22 @@ export default async function DashboardPage() {
 
     return (
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold">Hola, {profile?.full_name?.split(' ')[0]} 👋</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            {prof?.plan === 'premium'
-              ? 'Tienes acceso prioritario a todas las ofertas urgentes.'
-              : 'Mejora a Premium para recibir alertas instantáneas y acceso prioritario.'}
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Hola, {profile?.full_name?.split(' ')[0]} 👋</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              {prof?.plan === 'premium'
+                ? 'Tienes acceso prioritario a todas las ofertas urgentes.'
+                : 'Mejora a Premium para recibir alertas instantáneas y acceso prioritario.'}
+            </p>
+          </div>
+          {isAdmin && (
+            <Link href="/dashboard/admin">
+              <Button variant="outline" size="sm" className="gap-2 shrink-0">
+                <BarChart2 className="h-4 w-4" /> Métricas
+              </Button>
+            </Link>
+          )}
         </div>
 
         {prof?.plan === 'free' && (
