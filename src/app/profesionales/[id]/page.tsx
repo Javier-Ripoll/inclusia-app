@@ -62,6 +62,15 @@ export default async function ProfessionalPublicPage({ params }: { params: Promi
       .order('start_date', { ascending: false }),
   ])
 
+  // Generate signed URL for CV (bucket is private)
+  let cvSignedUrl: string | null = null
+  if (prof.cv_url) {
+    const { data } = await serviceSupabase.storage
+      .from('cvs')
+      .createSignedUrl(prof.cv_url, 60 * 60) // 1 hour
+    cvSignedUrl = data?.signedUrl ?? null
+  }
+
   // Check if the viewer is a company (to show contact button)
   const { data: { user } } = await supabase.auth.getUser()
   let isCompany = false
@@ -119,8 +128,8 @@ export default async function ProfessionalPublicPage({ params }: { params: Promi
                     </Button>
                   </a>
                 )}
-                {prof.cv_url && (
-                  <a href={prof.cv_url} target="_blank" rel="noopener noreferrer" className="block w-full mt-2">
+                {cvSignedUrl && (
+                  <a href={cvSignedUrl} target="_blank" rel="noopener noreferrer" className="block w-full mt-2">
                     <Button variant="outline" className="w-full gap-2" size="sm">
                       <FileText className="h-4 w-4" /> Ver CV
                     </Button>
