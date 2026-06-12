@@ -56,7 +56,7 @@ const PLANS = [
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_COMPANY_PREMIUM,
     features: [
       'Todo lo de Pro',
-      'Matching automático con IA',
+      'Matching automático con IA 🔜',
       'Acceso a base de datos completa de profesionales',
       'Informes mensuales de cobertura',
       'Gestor de cuenta dedicado',

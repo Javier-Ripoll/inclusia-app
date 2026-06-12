@@ -45,7 +45,7 @@ const STATS = [
 const PROFESSIONAL_FEATURES = [
   { icon: Bell, text: 'Alertas instantáneas de nuevas ofertas' },
   { icon: Zap, text: 'Acceso prioritario a sustituciones urgentes' },
-  { icon: Brain, text: 'Matching IA: las mejores ofertas para tu perfil' },
+  { icon: Brain, text: 'Matching IA: las mejores ofertas para tu perfil (próximamente)' },
   { icon: Star, text: 'Perfil destacado ante reclutadores' },
   { icon: MapPin, text: 'Filtrado avanzado por zona exacta' },
   { icon: Clock, text: 'Respuesta antes que los usuarios gratuitos' },
@@ -53,7 +53,7 @@ const PROFESSIONAL_FEATURES = [
 
 const COMPANY_FEATURES = [
   { icon: Zap, text: 'Candidatos "disponibles ahora" en tiempo real' },
-  { icon: Brain, text: 'Ranking IA de candidatos por compatibilidad' },
+  { icon: Brain, text: 'Ranking IA de candidatos por compatibilidad (próximamente)' },
   { icon: Bell, text: 'Cobertura urgente automática con envío masivo' },
   { icon: MapPin, text: 'Geolocalización avanzada por zona' },
   { icon: Star, text: 'Bolsa de talento: guarda tus favoritos' },
