@@ -46,6 +46,9 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [addingEdu, setAddingEdu] = useState(false)
+  const [addingExp, setAddingExp] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
 
   // Personal info
   const [fullName, setFullName] = useState(profile?.full_name ?? '')
@@ -126,17 +129,27 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
 
   const addEducation = async () => {
     if (!newDegree) return
+    setAddingEdu(true)
+    setAddError(null)
     const supabase = createClient()
-    const { data: prof } = await supabase
+    const { data: prof, error: profError } = await supabase
       .from('professional_profiles').select('id').eq('user_id', profile.id).single()
+    if (profError || !prof) {
+      setAddError('No se encontró tu perfil profesional. Recarga la página.')
+      setAddingEdu(false)
+      return
+    }
     const { data, error } = await supabase
       .from('professional_education')
-      .insert({ professional_id: prof?.id, degree: newDegree, institution: newInstitution, year_completed: newYear ? parseInt(newYear) : null })
+      .insert({ professional_id: prof.id, degree: newDegree, institution: newInstitution, year_completed: newYear ? parseInt(newYear) : null })
       .select().single()
-    if (!error && data) {
-      setEducationList(prev => [data, ...prev])
+    if (error || !data) {
+      setAddError('Error al guardar la titulación. Inténtalo de nuevo.')
+    } else {
+      setEducationList(prev => [...prev, data])
       setNewDegree(''); setNewInstitution(''); setNewYear('')
     }
+    setAddingEdu(false)
   }
 
   const deleteEducation = async (id: string) => {
@@ -147,13 +160,20 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
 
   const addExperience = async () => {
     if (!newPosition) return
+    setAddingExp(true)
+    setAddError(null)
     const supabase = createClient()
-    const { data: prof } = await supabase
+    const { data: prof, error: profError } = await supabase
       .from('professional_profiles').select('id').eq('user_id', profile.id).single()
+    if (profError || !prof) {
+      setAddError('No se encontró tu perfil profesional. Recarga la página.')
+      setAddingExp(false)
+      return
+    }
     const { data, error } = await supabase
       .from('professional_experience')
       .insert({
-        professional_id: prof?.id,
+        professional_id: prof.id,
         position: newPosition,
         company: newCompany,
         start_date: newStartDate || null,
@@ -162,11 +182,14 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
         description: newExpDesc,
       })
       .select().single()
-    if (!error && data) {
-      setExperienceList(prev => [data, ...prev])
+    if (error || !data) {
+      setAddError('Error al guardar la experiencia. Inténtalo de nuevo.')
+    } else {
+      setExperienceList(prev => [...prev, data])
       setNewPosition(''); setNewCompany(''); setNewStartDate('')
       setNewEndDate(''); setNewIsCurrent(false); setNewExpDesc('')
     }
+    setAddingExp(false)
   }
 
   const deleteExperience = async (id: string) => {
@@ -360,6 +383,9 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
 
         {/* FORMACIÓN */}
         <TabsContent value="formacion" className="space-y-4 mt-4">
+          {addError && (
+            <Alert variant="destructive"><AlertDescription>{addError}</AlertDescription></Alert>
+          )}
           <Card>
             <CardHeader><CardTitle className="text-base">Añadir titulación</CardTitle></CardHeader>
             <CardContent className="space-y-4">
@@ -377,8 +403,9 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
                   <Input value={newYear} onChange={e => setNewYear(e.target.value)} placeholder="2022" type="number" min="1980" max="2030" />
                 </div>
               </div>
-              <Button onClick={addEducation} disabled={!newDegree} variant="outline" className="gap-2">
-                <Plus className="h-4 w-4" /> Añadir titulación
+              <Button onClick={addEducation} disabled={!newDegree || addingEdu} variant="outline" className="gap-2">
+                {addingEdu ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                {addingEdu ? 'Guardando...' : 'Añadir titulación'}
               </Button>
             </CardContent>
           </Card>
@@ -409,6 +436,9 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
 
         {/* EXPERIENCIA */}
         <TabsContent value="experiencia" className="space-y-4 mt-4">
+          {addError && (
+            <Alert variant="destructive"><AlertDescription>{addError}</AlertDescription></Alert>
+          )}
           <Card>
             <CardHeader><CardTitle className="text-base">Añadir experiencia</CardTitle></CardHeader>
             <CardContent className="space-y-4">
@@ -438,8 +468,9 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
                 <Label>Descripción</Label>
                 <Textarea value={newExpDesc} onChange={e => setNewExpDesc(e.target.value)} placeholder="Describe tus tareas y logros..." rows={3} />
               </div>
-              <Button onClick={addExperience} disabled={!newPosition} variant="outline" className="gap-2">
-                <Plus className="h-4 w-4" /> Añadir experiencia
+              <Button onClick={addExperience} disabled={!newPosition || addingExp} variant="outline" className="gap-2">
+                {addingExp ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                {addingExp ? 'Guardando...' : 'Añadir experiencia'}
               </Button>
             </CardContent>
           </Card>
