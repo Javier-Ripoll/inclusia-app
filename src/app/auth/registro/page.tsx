@@ -53,6 +53,13 @@ function RegisterForm() {
       return
     }
 
+    // Si hay sesión activa (confirmación desactivada), redirigir directo al dashboard
+    if (authData.session) {
+      window.location.href = '/dashboard'
+      return
+    }
+
+    // Si no hay sesión (confirmación activada), mostrar mensaje de email
     setSuccess(true)
     setLoading(false)
   }
