@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { MapPin, Star, CheckCircle, Zap, Users, ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { ProvinciaSelect } from './provincia-select'
 
 const PAGE_SIZE = 24
 
@@ -76,7 +77,14 @@ async function getProvincias() {
     .select('province')
     .eq('role', 'professional')
     .not('province', 'is', null)
-  const unique = [...new Set((data ?? []).map((p: any) => p.province).filter(Boolean))].sort()
+  // Normalize: trim + capitalize first letter to deduplicate variants
+  const normalize = (s: string) => s.trim().replace(/\s+/g, ' ')
+  const unique = [...new Set(
+    (data ?? [])
+      .map((p: any) => p.province)
+      .filter(Boolean)
+      .map(normalize)
+  )].sort()
   return unique as string[]
 }
 
@@ -141,32 +149,13 @@ export default async function ProfesionalesPage({
 
         {/* Filtros */}
         <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3 overflow-x-auto scrollbar-hide">
-            <span className="text-sm font-medium text-muted-foreground shrink-0 flex items-center gap-1.5">
-              <MapPin className="h-4 w-4" /> Provincia:
-            </span>
-
-            <Link href="/profesionales?page=1">
-              <button className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors whitespace-nowrap ${
-                !provincia ? 'bg-primary text-white border-primary' : 'border-border hover:border-primary/50'
-              }`}>
-                Toda España
-              </button>
-            </Link>
-
-            {provincias.map(prov => (
-              <Link key={prov} href={provinciaUrl(prov)}>
-                <button className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors whitespace-nowrap ${
-                  provincia === prov ? 'bg-primary text-white border-primary' : 'border-border hover:border-primary/50'
-                }`}>
-                  {prov}
-                </button>
-              </Link>
-            ))}
-
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+            <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="text-sm font-medium text-muted-foreground shrink-0">Provincia:</span>
+            <ProvinciaSelect provincias={provincias} selected={provincia} />
             {provincia && (
-              <Link href="/profesionales?page=1" className="shrink-0 ml-auto">
-                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+              <Link href="/profesionales?page=1" className="shrink-0">
+                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
                   <X className="h-3 w-3" /> Quitar filtro
                 </button>
               </Link>
