@@ -64,7 +64,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <NotificationsProvider userId={user.id} initialNotifications={initialNotifications ?? []}>
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex min-h-[100dvh] md:h-screen bg-gray-50">
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-64 bg-white border-r border-border">
           <div className="p-6 border-b border-border">
@@ -113,7 +113,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto pb-20 md:pb-0">
+        <main className="flex-1 md:overflow-auto pb-24 md:pb-0">
           {/* Mobile top bar */}
           <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b sticky top-0 z-10">
             <Link href="/" className="flex items-center gap-2">
