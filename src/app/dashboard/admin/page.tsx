@@ -28,7 +28,6 @@ async function getMetrics() {
     { count: totalApplications },
     { count: applicationsThisWeek },
     { count: availableNow },
-    { data: recentUsers },
     { data: topOffers },
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'professional'),
@@ -45,13 +44,31 @@ async function getMetrics() {
     supabase.from('applications').select('id', { count: 'exact', head: true })
       .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
     supabase.from('professional_profiles').select('id', { count: 'exact', head: true }).eq('available_immediately', true),
-    supabase.from('profiles').select('id, full_name, email, role, created_at')
-      .order('created_at', { ascending: false })
-      .limit(10),
     supabase.from('job_offers').select('id, title, city, is_urgent, status, created_at')
       .order('created_at', { ascending: false })
       .limit(8),
   ])
+
+  // Recent users: join auth.users (has email) with profiles (has role + name)
+  const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 10, page: 1 })
+  const recentProfilesRaw = await supabase
+    .from('profiles')
+    .select('id, full_name, role, created_at')
+    .in('id', authUsers?.users.map(u => u.id) ?? [])
+
+  const profileMap = Object.fromEntries(
+    (recentProfilesRaw.data ?? []).map(p => [p.id, p])
+  )
+  const recentUsers = (authUsers?.users ?? [])
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 10)
+    .map(u => ({
+      id: u.id,
+      email: u.email ?? '—',
+      full_name: profileMap[u.id]?.full_name ?? '—',
+      role: profileMap[u.id]?.role ?? '—',
+      created_at: u.created_at,
+    }))
 
   return {
     totalProfessionals: totalProfessionals ?? 0,
