@@ -5,8 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
-import { MapPin, Star, CheckCircle, Zap, Users, ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { ProvinciaSelect } from './provincia-select'
+import { MapPin, Star, CheckCircle, Zap, Users, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const PAGE_SIZE = 24
 
@@ -19,29 +18,8 @@ const SPEC_LABELS: Record<string, string> = {
   conducta: 'Conducta', vision: 'Visión', audicion: 'Audición',
 }
 
-const COMUNIDADES: Record<string, string[]> = {
-  'Andalucía': ['Almería','Cádiz','Córdoba','Granada','Huelva','Jaén','Málaga','Sevilla'],
-  'Aragón': ['Huesca','Teruel','Zaragoza'],
-  'Asturias': ['Asturias'],
-  'Baleares': ['Baleares'],
-  'Canarias': ['Las Palmas','Santa Cruz de Tenerife'],
-  'Cantabria': ['Cantabria'],
-  'Castilla-La Mancha': ['Albacete','Ciudad Real','Cuenca','Guadalajara','Toledo'],
-  'Castilla y León': ['Ávila','Burgos','León','Palencia','Salamanca','Segovia','Soria','Valladolid','Zamora'],
-  'Cataluña': ['Barcelona','Girona','Lleida','Tarragona'],
-  'Extremadura': ['Badajoz','Cáceres'],
-  'Galicia': ['A Coruña','Lugo','Ourense','Pontevedra'],
-  'La Rioja': ['La Rioja'],
-  'Madrid': ['Madrid'],
-  'Murcia': ['Murcia'],
-  'Navarra': ['Navarra'],
-  'País Vasco': ['Álava','Gipuzkoa','Bizkaia'],
-  'Valencia': ['Alicante','Castellón','Valencia'],
-  'Ceuta': ['Ceuta'],
-  'Melilla': ['Melilla'],
-}
 
-async function getProfessionals(page: number, provincia?: string) {
+async function getProfessionals(page: number) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -49,43 +27,18 @@ async function getProfessionals(page: number, provincia?: string) {
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
-  let query = supabase
+  const { data, count } = await supabase
     .from('professional_profiles')
     .select(`
       id, bio, years_experience, specializations,
       is_available, available_immediately, plan,
-      profiles!inner(full_name, city, province)
+      profiles(full_name, city, province)
     `, { count: 'exact' })
     .order('is_available', { ascending: false })
     .order('created_at', { ascending: false })
+    .range(from, to)
 
-  if (provincia) {
-    query = query.eq('profiles.province', provincia)
-  }
-
-  const { data, count } = await query.range(from, to)
   return { professionals: data ?? [], total: count ?? 0 }
-}
-
-async function getProvincias() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-  const { data } = await supabase
-    .from('profiles')
-    .select('province')
-    .eq('role', 'professional')
-    .not('province', 'is', null)
-  // Normalize: trim + capitalize first letter to deduplicate variants
-  const normalize = (s: string) => s.trim().replace(/\s+/g, ' ')
-  const unique = [...new Set(
-    (data ?? [])
-      .map((p: any) => p.province)
-      .filter(Boolean)
-      .map(normalize)
-  )].sort()
-  return unique as string[]
 }
 
 export default async function ProfesionalesPage({
@@ -95,25 +48,8 @@ export default async function ProfesionalesPage({
 }) {
   const sp = await searchParams
   const page = Math.max(1, parseInt(sp.page ?? '1'))
-  const provincia = sp.provincia ?? ''
-
-  const [{ professionals, total }, provincias] = await Promise.all([
-    getProfessionals(page, provincia || undefined),
-    getProvincias(),
-  ])
+  const { professionals, total } = await getProfessionals(page)
   const totalPages = Math.ceil(total / PAGE_SIZE)
-
-  // Build filter URL preserving provincia
-  function pageUrl(p: number) {
-    const params = new URLSearchParams()
-    if (provincia) params.set('provincia', provincia)
-    params.set('page', String(p))
-    return `/profesionales?${params.toString()}`
-  }
-
-  function provinciaUrl(prov: string) {
-    return prov ? `/profesionales?provincia=${encodeURIComponent(prov)}&page=1` : '/profesionales?page=1'
-  }
 
   return (
     <>
@@ -133,7 +69,7 @@ export default async function ProfesionalesPage({
             <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground flex-wrap">
               <span className="flex items-center gap-1.5">
                 <Users className="h-4 w-4 text-primary" />
-                {total} profesionales{provincia ? ` en ${provincia}` : ' en la red'}
+                {total} profesionales en la red
               </span>
               <span className="flex items-center gap-1.5">
                 <Zap className="h-4 w-4 text-orange-500" />
@@ -147,21 +83,6 @@ export default async function ProfesionalesPage({
           </div>
         </div>
 
-        {/* Filtros */}
-        <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-            <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-sm font-medium text-muted-foreground shrink-0">Provincia:</span>
-            <ProvinciaSelect provincias={provincias} selected={provincia} />
-            {provincia && (
-              <Link href="/profesionales?page=1" className="shrink-0">
-                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
-                  <X className="h-3 w-3" /> Quitar filtro
-                </button>
-              </Link>
-            )}
-          </div>
-        </div>
 
         {/* Grid */}
         <div className="max-w-6xl mx-auto px-4 py-12">
@@ -248,7 +169,7 @@ export default async function ProfesionalesPage({
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-12">
                   {page > 1 && (
-                    <Link href={pageUrl(page - 1)}>
+                    <Link href={`/profesionales?page=${page - 1}`}>
                       <Button variant="outline" size="sm" className="gap-1">
                         <ChevronLeft className="h-4 w-4" /> Anterior
                       </Button>
@@ -257,7 +178,7 @@ export default async function ProfesionalesPage({
 
                   <div className="flex items-center gap-1">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                      <Link key={p} href={pageUrl(p)}>
+                      <Link key={p} href={`/profesionales?page=${p}`}>
                         <button className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
                           p === page
                             ? 'bg-primary text-white'
@@ -270,7 +191,7 @@ export default async function ProfesionalesPage({
                   </div>
 
                   {page < totalPages && (
-                    <Link href={pageUrl(page + 1)}>
+                    <Link href={`/profesionales?page=${page + 1}`}>
                       <Button variant="outline" size="sm" className="gap-1">
                         Siguiente <ChevronRight className="h-4 w-4" />
                       </Button>
@@ -280,20 +201,13 @@ export default async function ProfesionalesPage({
               )}
 
               <p className="text-center text-xs text-muted-foreground mt-4">
-                Página {page} de {totalPages} · {total} profesionales{provincia ? ` en ${provincia}` : ' en total'}
+                Página {page} de {totalPages} · {total} profesionales en total
               </p>
             </>
           ) : (
             <div className="text-center py-20 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
-              <p className="font-medium text-lg">
-                {provincia ? `No hay profesionales en ${provincia} aún` : 'Próximamente'}
-              </p>
-              {provincia && (
-                <Link href="/profesionales?page=1">
-                  <Button variant="outline" size="sm" className="mt-4">Ver todos</Button>
-                </Link>
-              )}
+              <p className="font-medium text-lg">Próximamente</p>
             </div>
           )}
 
