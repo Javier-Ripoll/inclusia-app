@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
-import { MapPin, Star, CheckCircle, Zap, Users, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { MapPin, Star, CheckCircle, Zap, Users, ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 const PAGE_SIZE = 24
 
@@ -18,7 +18,29 @@ const SPEC_LABELS: Record<string, string> = {
   conducta: 'Conducta', vision: 'Visión', audicion: 'Audición',
 }
 
-async function getProfessionals(page: number) {
+const COMUNIDADES: Record<string, string[]> = {
+  'Andalucía': ['Almería','Cádiz','Córdoba','Granada','Huelva','Jaén','Málaga','Sevilla'],
+  'Aragón': ['Huesca','Teruel','Zaragoza'],
+  'Asturias': ['Asturias'],
+  'Baleares': ['Baleares'],
+  'Canarias': ['Las Palmas','Santa Cruz de Tenerife'],
+  'Cantabria': ['Cantabria'],
+  'Castilla-La Mancha': ['Albacete','Ciudad Real','Cuenca','Guadalajara','Toledo'],
+  'Castilla y León': ['Ávila','Burgos','León','Palencia','Salamanca','Segovia','Soria','Valladolid','Zamora'],
+  'Cataluña': ['Barcelona','Girona','Lleida','Tarragona'],
+  'Extremadura': ['Badajoz','Cáceres'],
+  'Galicia': ['A Coruña','Lugo','Ourense','Pontevedra'],
+  'La Rioja': ['La Rioja'],
+  'Madrid': ['Madrid'],
+  'Murcia': ['Murcia'],
+  'Navarra': ['Navarra'],
+  'País Vasco': ['Álava','Gipuzkoa','Bizkaia'],
+  'Valencia': ['Alicante','Castellón','Valencia'],
+  'Ceuta': ['Ceuta'],
+  'Melilla': ['Melilla'],
+}
+
+async function getProfessionals(page: number, provincia?: string) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -26,20 +48,36 @@ async function getProfessionals(page: number) {
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
-  const [{ data, count }] = await Promise.all([
-    supabase
-      .from('professional_profiles')
-      .select(`
-        id, bio, years_experience, specializations,
-        is_available, available_immediately, plan,
-        profiles(full_name, city, province)
-      `, { count: 'exact' })
-      .order('is_available', { ascending: false })
-      .order('created_at', { ascending: false })
-      .range(from, to),
-  ])
+  let query = supabase
+    .from('professional_profiles')
+    .select(`
+      id, bio, years_experience, specializations,
+      is_available, available_immediately, plan,
+      profiles!inner(full_name, city, province)
+    `, { count: 'exact' })
+    .order('is_available', { ascending: false })
+    .order('created_at', { ascending: false })
 
+  if (provincia) {
+    query = query.eq('profiles.province', provincia)
+  }
+
+  const { data, count } = await query.range(from, to)
   return { professionals: data ?? [], total: count ?? 0 }
+}
+
+async function getProvincias() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data } = await supabase
+    .from('profiles')
+    .select('province')
+    .eq('role', 'professional')
+    .not('province', 'is', null)
+  const unique = [...new Set((data ?? []).map((p: any) => p.province).filter(Boolean))].sort()
+  return unique as string[]
 }
 
 export default async function ProfesionalesPage({
@@ -49,8 +87,25 @@ export default async function ProfesionalesPage({
 }) {
   const sp = await searchParams
   const page = Math.max(1, parseInt(sp.page ?? '1'))
-  const { professionals, total } = await getProfessionals(page)
+  const provincia = sp.provincia ?? ''
+
+  const [{ professionals, total }, provincias] = await Promise.all([
+    getProfessionals(page, provincia || undefined),
+    getProvincias(),
+  ])
   const totalPages = Math.ceil(total / PAGE_SIZE)
+
+  // Build filter URL preserving provincia
+  function pageUrl(p: number) {
+    const params = new URLSearchParams()
+    if (provincia) params.set('provincia', provincia)
+    params.set('page', String(p))
+    return `/profesionales?${params.toString()}`
+  }
+
+  function provinciaUrl(prov: string) {
+    return prov ? `/profesionales?provincia=${encodeURIComponent(prov)}&page=1` : '/profesionales?page=1'
+  }
 
   return (
     <>
@@ -67,10 +122,10 @@ export default async function ProfesionalesPage({
               Conoce a los profesionales que forman la red Inclusia. Disponibles para cubrir
               necesidades educativas en centros de toda España.
             </p>
-            <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground flex-wrap">
               <span className="flex items-center gap-1.5">
                 <Users className="h-4 w-4 text-primary" />
-                {total} profesionales en la red
+                {total} profesionales{provincia ? ` en ${provincia}` : ' en la red'}
               </span>
               <span className="flex items-center gap-1.5">
                 <Zap className="h-4 w-4 text-orange-500" />
@@ -81,6 +136,41 @@ export default async function ProfesionalesPage({
                 Perfiles verificados
               </span>
             </div>
+          </div>
+        </div>
+
+        {/* Filtros */}
+        <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3 overflow-x-auto scrollbar-hide">
+            <span className="text-sm font-medium text-muted-foreground shrink-0 flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" /> Provincia:
+            </span>
+
+            <Link href="/profesionales?page=1">
+              <button className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors whitespace-nowrap ${
+                !provincia ? 'bg-primary text-white border-primary' : 'border-border hover:border-primary/50'
+              }`}>
+                Toda España
+              </button>
+            </Link>
+
+            {provincias.map(prov => (
+              <Link key={prov} href={provinciaUrl(prov)}>
+                <button className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors whitespace-nowrap ${
+                  provincia === prov ? 'bg-primary text-white border-primary' : 'border-border hover:border-primary/50'
+                }`}>
+                  {prov}
+                </button>
+              </Link>
+            ))}
+
+            {provincia && (
+              <Link href="/profesionales?page=1" className="shrink-0 ml-auto">
+                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+                  <X className="h-3 w-3" /> Quitar filtro
+                </button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -169,7 +259,7 @@ export default async function ProfesionalesPage({
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-12">
                   {page > 1 && (
-                    <Link href={`/profesionales?page=${page - 1}`}>
+                    <Link href={pageUrl(page - 1)}>
                       <Button variant="outline" size="sm" className="gap-1">
                         <ChevronLeft className="h-4 w-4" /> Anterior
                       </Button>
@@ -178,7 +268,7 @@ export default async function ProfesionalesPage({
 
                   <div className="flex items-center gap-1">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                      <Link key={p} href={`/profesionales?page=${p}`}>
+                      <Link key={p} href={pageUrl(p)}>
                         <button className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
                           p === page
                             ? 'bg-primary text-white'
@@ -191,7 +281,7 @@ export default async function ProfesionalesPage({
                   </div>
 
                   {page < totalPages && (
-                    <Link href={`/profesionales?page=${page + 1}`}>
+                    <Link href={pageUrl(page + 1)}>
                       <Button variant="outline" size="sm" className="gap-1">
                         Siguiente <ChevronRight className="h-4 w-4" />
                       </Button>
@@ -201,14 +291,20 @@ export default async function ProfesionalesPage({
               )}
 
               <p className="text-center text-xs text-muted-foreground mt-4">
-                Página {page} de {totalPages} · {total} profesionales en total
+                Página {page} de {totalPages} · {total} profesionales{provincia ? ` en ${provincia}` : ' en total'}
               </p>
             </>
           ) : (
             <div className="text-center py-20 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
-              <p className="font-medium text-lg">Próximamente</p>
-              <p className="text-sm mt-2">Los profesionales de la red aparecerán aquí.</p>
+              <p className="font-medium text-lg">
+                {provincia ? `No hay profesionales en ${provincia} aún` : 'Próximamente'}
+              </p>
+              {provincia && (
+                <Link href="/profesionales?page=1">
+                  <Button variant="outline" size="sm" className="mt-4">Ver todos</Button>
+                </Link>
+              )}
             </div>
           )}
 
