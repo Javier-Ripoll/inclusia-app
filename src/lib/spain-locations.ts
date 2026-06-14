@@ -1,7 +1,7 @@
 export const PROVINCIAS_CIUDADES: Record<string, string[]> = {
   'Álava': ['Vitoria-Gasteiz', 'Llodio', 'Amurrio', 'Salvatierra', 'Laudio'],
   'Albacete': ['Albacete', 'Hellín', 'Almansa', 'Villarrobledo', 'La Roda', 'Caudete'],
-  'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Orihuela', 'Benidorm', 'Alcoy', 'Elda', 'Petrer', 'San Vicente del Raspeig', 'Villena', 'Dénia', 'Calp', 'Ibi', 'Crevillent', 'Novelda'],
+  'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Orihuela', 'Benidorm', 'Alcoy', 'Elda', 'Petrer', 'San Vicente del Raspeig', 'Villena', 'Dénia', 'Calp', 'Ibi', 'Crevillent', 'Novelda', 'Sant Joan d\'Alacant', 'Mutxamel', 'El Campello', 'Santa Pola', 'Guardamar del Segura', 'Torredembarra', 'Xàbia', 'Altea', 'Rojales', 'Cox', 'Aspe', 'Monforte del Cid', 'Bigastro', 'Dolores', 'Pilar de la Horadada', 'Pego'],
   'Almería': ['Almería', 'El Ejido', 'Roquetas de Mar', 'Vícar', 'Níjar', 'Adra', 'Vera', 'Berja'],
   'Asturias': ['Oviedo', 'Gijón', 'Avilés', 'Siero', 'Langreo', 'Mieres', 'Castrillón', 'Carreño', 'Gozón', 'Valdés'],
   'Ávila': ['Ávila', 'Arévalo', 'Arenas de San Pedro'],
