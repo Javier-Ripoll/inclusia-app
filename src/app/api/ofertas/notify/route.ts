@@ -44,15 +44,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ notified: 0, emailed: 0 })
   }
 
-  // Get emails from auth.users for premium professionals
-  const premiumIds = professionals
-    .filter((p: any) => p.professional_profiles?.plan === 'premium')
-    .map((p: any) => p.id)
-
+  // Get emails from auth.users for all professionals in the province
   const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 1000 })
+  const allIds = professionals.map((p: any) => p.id)
   const emailMap = Object.fromEntries(
     (authData?.users ?? [])
-      .filter(u => premiumIds.includes(u.id))
+      .filter(u => allIds.includes(u.id))
       .map(u => [u.id, u.email])
   )
 
@@ -81,7 +78,6 @@ export async function POST(req: NextRequest) {
 
   for (const prof of professionals) {
     const p = prof as any
-    if (p.professional_profiles?.plan !== 'premium') continue
     const email = emailMap[p.id]
     if (!email) continue
 
@@ -98,10 +94,6 @@ export async function POST(req: NextRequest) {
             </div>
 
             <div style="background: white; padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-              <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 10px 16px; margin-bottom: 20px; display: inline-block;">
-                <span style="color: #92400e; font-weight: 600; font-size: 13px;">⭐ Alerta exclusiva Premium — acceso anticipado</span>
-              </div>
-
               ${offer.is_urgent ? `
                 <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; display: inline-block;">
                   <span style="color: #dc2626; font-weight: 600; font-size: 14px;">🔴 Oferta urgente</span>
@@ -126,7 +118,7 @@ export async function POST(req: NextRequest) {
               </a>
 
               <p style="margin: 24px 0 0; color: #9ca3af; font-size: 12px; line-height: 1.6;">
-                Recibes este email por ser usuario Premium de Inclusia en la provincia de ${province}.<br>
+                Recibes este email porque tienes un perfil en Inclusia en la provincia de ${province}.<br>
                 <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/perfil" style="color: #6b7280;">Gestionar mi perfil</a>
               </p>
             </div>
