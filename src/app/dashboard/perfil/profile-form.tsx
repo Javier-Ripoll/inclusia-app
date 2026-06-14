@@ -17,6 +17,7 @@ import {
   Loader2, Plus, Trash2, CheckCircle, User, Briefcase,
   GraduationCap, MapPin, Clock, Star, Upload, FileText, X
 } from 'lucide-react'
+import { LocationSelect } from '@/components/ui/location-select'
 
 const SPECIALIZATIONS = [
   'PATI', 'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
@@ -306,16 +307,12 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
                 <Label>Teléfono</Label>
                 <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="612 345 678" type="tel" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Ciudad</Label>
-                  <Input value={city} onChange={e => setCity(e.target.value)} placeholder="Valencia" />
-                </div>
-                <div>
-                  <Label>Provincia</Label>
-                  <Input value={province} onChange={e => setProvince(e.target.value)} placeholder="Valencia" />
-                </div>
-              </div>
+              <LocationSelect
+                provincia={province}
+                ciudad={city}
+                onProvinciaChange={setProvince}
+                onCiudadChange={setCity}
+              />
             </CardContent>
           </Card>
 

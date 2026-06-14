@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, CheckCircle, ArrowRight, ArrowLeft, Zap, GraduationCap, Building2 } from 'lucide-react'
+import { LocationSelect } from '@/components/ui/location-select'
 
 /* ── PROFESSIONAL CONSTANTS ── */
 const SPECIALIZATIONS = [
@@ -252,21 +253,19 @@ export function OnboardingWizard({ role, name, professionalProfileId, companyPro
       icon: <Building2 className="h-6 w-6 text-primary" />,
       content: (
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="city">Ciudad / Municipio</Label>
-            <Input id="city" value={city} onChange={e => setCity(e.target.value)} placeholder="Madrid" className="mt-1" />
-          </div>
-          <div>
-            <Label htmlFor="province">Provincia</Label>
-            <Input id="province" value={province} onChange={e => setProvince(e.target.value)} placeholder="Madrid" className="mt-1" />
-          </div>
+          <LocationSelect
+            provincia={province}
+            ciudad={city}
+            onProvinciaChange={setProvince}
+            onCiudadChange={setCity}
+          />
           <div>
             <Label htmlFor="phone">Teléfono de contacto</Label>
             <Input id="phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="91 000 00 00" className="mt-1" />
           </div>
         </div>
       ),
-      canContinue: !!city,
+      canContinue: !!city && !!province,
     },
     {
       title: 'Describe vuestro centro',
