@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ApplicationActions } from '@/app/dashboard/ofertas/[id]/application-actions'
 import { StartChatButton } from '@/app/dashboard/ofertas/[id]/start-chat-button'
 import {
-  Users, MapPin, Star, Clock, CheckCircle, Zap, Briefcase
+  Users, MapPin, Star, Clock, CheckCircle, Zap, Briefcase, Crown
 } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 
@@ -61,7 +61,7 @@ export default async function CandidatosPage({
       *,
       job_offers(id, title, is_urgent),
       professional_profiles(
-        id, user_id, bio, years_experience, specializations, available_immediately,
+        id, user_id, bio, years_experience, specializations, available_immediately, plan,
         profiles(full_name, city, phone)
       )
     `)
@@ -74,9 +74,17 @@ export default async function CandidatosPage({
   if (statusFilter) query = query.eq('status', statusFilter)
   if (offerFilter) query = query.eq('offer_id', offerFilter)
 
-  const { data: applications } = await query
+  const { data: rawApplications } = await query
 
-  const total = applications?.length ?? 0
+  // Sort: premium professionals first, then by date
+  const applications = (rawApplications ?? []).sort((a: any, b: any) => {
+    const aIsPremium = a.professional_profiles?.plan === 'premium' ? 0 : 1
+    const bIsPremium = b.professional_profiles?.plan === 'premium' ? 0 : 1
+    if (aIsPremium !== bIsPremium) return aIsPremium - bIsPremium
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
+
+  const total = applications.length
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -148,8 +156,10 @@ export default async function CandidatosPage({
               <Card
                 key={app.id}
                 className={`transition-all ${
-                  app.status === 'accepted' ? 'border-green-200 bg-green-50/30' :
-                  app.status === 'rejected' ? 'opacity-60' : ''
+                  app.professional_profiles?.plan === 'premium'
+                    ? 'border-amber-200 bg-amber-50/20 shadow-sm'
+                    : app.status === 'accepted' ? 'border-green-200 bg-green-50/30'
+                    : app.status === 'rejected' ? 'opacity-60' : ''
                 }`}
               >
                 <CardContent className="p-5">
@@ -163,6 +173,11 @@ export default async function CandidatosPage({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h3 className="font-semibold">{profileData?.full_name ?? 'Profesional'}</h3>
+                        {prof?.plan === 'premium' && (
+                          <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs gap-1">
+                            <Crown className="h-3 w-3" /> Premium
+                          </Badge>
+                        )}
                         {prof?.available_immediately && (
                           <Badge className="bg-green-100 text-green-700 border-0 text-xs gap-1">
                             <CheckCircle className="h-3 w-3" /> Disponible ahora
