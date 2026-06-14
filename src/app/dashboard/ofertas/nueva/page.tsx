@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Switch } from '@/components/ui/switch'
 import { Loader2, Zap, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { LocationSelect } from '@/components/ui/location-select'
 
 const SPECIALIZATIONS = [
   'PATI', 'Integración Social', 'Atención a la Dependencia', 'Auxiliar Educativo',
@@ -75,7 +76,7 @@ export default function NewOfferPage() {
       return
     }
 
-    const { error: insertError } = await supabase.from('job_offers').insert({
+    const { data: newOffer, error: insertError } = await supabase.from('job_offers').insert({
       company_id: companyProfile.id,
       title,
       description,
@@ -91,13 +92,20 @@ export default function NewOfferPage() {
       required_experience_years: parseInt(requiredExperience) || 0,
       start_date: startDate || null,
       status: 'active',
-    })
+    }).select('id').single()
 
-    if (insertError) {
-      setError('Error al publicar la oferta: ' + insertError.message)
+    if (insertError || !newOffer) {
+      setError('Error al publicar la oferta: ' + insertError?.message)
       setLoading(false)
       return
     }
+
+    // Notify professionals in the same province (fire and forget)
+    fetch('/api/ofertas/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offerId: newOffer.id }),
+    }).catch(console.error)
 
     router.push('/dashboard/ofertas')
     router.refresh()
@@ -166,27 +174,12 @@ export default function NewOfferPage() {
                 rows={5}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="city">Ciudad *</Label>
-                <Input
-                  id="city"
-                  placeholder="Valencia"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="province">Provincia</Label>
-                <Input
-                  id="province"
-                  placeholder="Valencia"
-                  value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                />
-              </div>
-            </div>
+            <LocationSelect
+              provincia={province}
+              ciudad={city}
+              onProvinciaChange={setProvince}
+              onCiudadChange={setCity}
+            />
           </CardContent>
         </Card>
 
