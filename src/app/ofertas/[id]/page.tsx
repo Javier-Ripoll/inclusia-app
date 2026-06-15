@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ApplyButton } from './apply-button'
 import {
   ArrowLeft, MapPin, Briefcase, Clock, Calendar,
-  Euro, GraduationCap, Zap, CheckCircle, Building2
+  Euro, GraduationCap, Zap, CheckCircle, Building2, Users
 } from 'lucide-react'
 
 const AVAILABILITY_LABELS: Record<string, string> = {
@@ -28,6 +28,11 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
     .single()
 
   if (!offer) notFound()
+
+  const { count: applicationCount } = await supabase
+    .from('applications')
+    .select('id', { count: 'exact', head: true })
+    .eq('offer_id', id)
 
   // Check if current user already applied
   const { data: { user } } = await supabase.auth.getUser()
@@ -81,6 +86,13 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
                     </p>
                   </div>
                 </div>
+
+                {(applicationCount ?? 0) > 0 && (
+                  <p className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
+                    <Users className="h-4 w-4" />
+                    {applicationCount} persona{applicationCount !== 1 ? 's' : ''} {applicationCount !== 1 ? 'han' : 'ha'} aplicado
+                  </p>
+                )}
 
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b">
                   {offer.city && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{offer.city}{offer.province ? `, ${offer.province}` : ''}</span>}
