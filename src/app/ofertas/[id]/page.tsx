@@ -11,6 +11,43 @@ import {
   Euro, GraduationCap, Zap, CheckCircle, Building2, Users
 } from 'lucide-react'
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const supabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data: offer } = await supabase
+    .from('job_offers')
+    .select('title, description, city, province, company_profiles(company_name)')
+    .eq('id', id)
+    .single()
+
+  if (!offer) return {}
+
+  const company = (offer.company_profiles as any)?.company_name ?? 'Inclusia'
+  const location = [offer.city, offer.province].filter(Boolean).join(', ')
+  const title = `${offer.title} – ${company}`
+  const description = `${location ? `📍 ${location} · ` : ''}${offer.description?.slice(0, 150) ?? ''}${(offer.description?.length ?? 0) > 150 ? '...' : ''}`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/ofertas/${id}`,
+      siteName: 'Inclusia',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+    },
+  }
+}
+
 const AVAILABILITY_LABELS: Record<string, string> = {
   full_time: 'Jornada completa', part_time: 'Media jornada',
   mornings: 'Mañanas', afternoons: 'Tardes',
