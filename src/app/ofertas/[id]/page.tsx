@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -29,7 +30,11 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
 
   if (!offer) notFound()
 
-  const { count: applicationCount } = await supabase
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { count: applicationCount } = await serviceClient
     .from('applications')
     .select('id', { count: 'exact', head: true })
     .eq('offer_id', id)
