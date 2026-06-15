@@ -76,6 +76,12 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
       </div>
 
       {/* Candidature stats */}
+      <div className="flex items-center gap-2 mb-3">
+        <Users className="h-4 w-4 text-primary" />
+        <span className="font-semibold text-sm">
+          {applications?.length ?? 0} candidatura{(applications?.length ?? 0) !== 1 ? 's' : ''} recibida{(applications?.length ?? 0) !== 1 ? 's' : ''}
+        </span>
+      </div>
       <div className="grid grid-cols-4 gap-3 mb-8">
         {[
           { label: 'Pendientes', value: statusCount.pending, color: 'text-orange-500' },
