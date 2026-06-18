@@ -143,6 +143,10 @@ export function ProfessionalProfileForm({ profile, professionalProfile, educatio
   }
 
   const handleSave = async () => {
+    if (!province) {
+      setError('La provincia es obligatoria.')
+      return
+    }
     setSaving(true)
     setError(null)
     const supabase = createClient()
