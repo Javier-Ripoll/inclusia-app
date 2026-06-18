@@ -30,6 +30,7 @@ async function getMetrics() {
     { count: applicationsThisWeek },
     { count: availableNow },
     { data: topOffers },
+    { data: allCompanies },
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'professional'),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'company'),
@@ -48,6 +49,9 @@ async function getMetrics() {
     supabase.from('job_offers').select('id, title, city, is_urgent, status, created_at')
       .order('created_at', { ascending: false })
       .limit(8),
+    supabase.from('company_profiles')
+      .select('user_id, company_name, company_type, profiles(city, province, created_at)')
+      .order('created_at', { ascending: false }),
   ])
 
   // Recent users: join auth.users (has email) with profiles (has role + name)
@@ -84,6 +88,7 @@ async function getMetrics() {
     availableNow: availableNow ?? 0,
     recentUsers: recentUsers ?? [],
     topOffers: topOffers ?? [],
+    allCompanies: allCompanies ?? [],
   }
 }
 
@@ -224,6 +229,35 @@ export default async function AdminPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* CENTROS / ENTIDADES */}
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 mt-8 flex items-center gap-2">
+        <Building2 className="h-4 w-4" /> Centros y entidades registrados ({m.allCompanies.length})
+      </h2>
+      <Card className="mb-8">
+        <CardContent className="pt-4">
+          {m.allCompanies.length > 0 ? (
+            <ul className="divide-y">
+              {m.allCompanies.map((c: any) => {
+                const profile = c.profiles as any
+                return (
+                  <li key={c.user_id} className="flex items-center justify-between py-2 text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{c.company_name ?? '—'}</p>
+                      <p className="text-xs text-muted-foreground">{c.company_type ?? 'Sin tipo'}{profile?.province ? ` · ${profile.province}` : ''}</p>
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0 ml-2 whitespace-nowrap">
+                      {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: '2-digit' }) : '—'}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">No hay centros registrados aún</p>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="mt-8 p-4 border rounded-xl bg-gray-50">
         <p className="text-sm font-medium mb-3">Acciones manuales</p>
