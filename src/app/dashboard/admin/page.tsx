@@ -31,6 +31,8 @@ async function getMetrics() {
     { count: availableNow },
     { data: topOffers },
     { data: allCompanies },
+    { count: totalNotifications },
+    { count: notificationsThisWeek },
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'professional'),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'company'),
@@ -52,6 +54,9 @@ async function getMetrics() {
     supabase.from('company_profiles')
       .select('user_id, company_name, company_type, profiles(city, province, created_at)')
       .order('created_at', { ascending: false }),
+    supabase.from('notifications').select('id', { count: 'exact', head: true }).in('type', ['new_offer', 'urgent_offer']),
+    supabase.from('notifications').select('id', { count: 'exact', head: true }).in('type', ['new_offer', 'urgent_offer'])
+      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
   ])
 
   // Recent users: join auth.users (has email) with profiles (has role + name)
@@ -89,6 +94,8 @@ async function getMetrics() {
     recentUsers: recentUsers ?? [],
     topOffers: topOffers ?? [],
     allCompanies: allCompanies ?? [],
+    totalNotifications: totalNotifications ?? 0,
+    notificationsThisWeek: notificationsThisWeek ?? 0,
   }
 }
 
@@ -167,6 +174,15 @@ export default async function AdminPage() {
         <StatCard title="Candidaturas totales" value={m.totalApplications} icon={FileText} color="text-primary" />
         <StatCard title="Candidaturas esta semana" value={m.applicationsThisWeek} icon={TrendingUp} color="text-orange-500" />
         <StatCard title="Disponibles ahora mismo" value={m.availableNow} icon={UserCheck} color="text-green-600" />
+      </div>
+
+      {/* ALERTAS */}
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+        <Activity className="h-4 w-4" /> Alertas de ofertas enviadas
+      </h2>
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <StatCard title="Alertas enviadas en total" value={m.totalNotifications} icon={Activity} color="text-indigo-600" />
+        <StatCard title="Alertas esta semana" value={m.notificationsThisWeek} icon={TrendingUp} color="text-indigo-400" />
       </div>
 
       {/* ÚLTIMOS REGISTROS */}
