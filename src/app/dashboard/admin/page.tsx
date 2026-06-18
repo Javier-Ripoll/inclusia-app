@@ -4,6 +4,7 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { BackButton } from '@/components/ui/back-button'
+import { BlastIncompleteProfilesButton } from './blast-button'
 import {
   Users, Building2, Briefcase, FileText,
   TrendingUp, UserCheck, CalendarDays, Activity
@@ -222,6 +223,11 @@ export default async function AdminPage() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      <div className="mt-8 p-4 border rounded-xl bg-gray-50">
+        <p className="text-sm font-medium mb-3">Acciones manuales</p>
+        <BlastIncompleteProfilesButton />
       </div>
 
       <p className="text-xs text-muted-foreground text-center mt-8">
