@@ -88,9 +88,9 @@ export default async function HomePage() {
               Cobertura de apoyo educativo en tiempo real
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-              Cubre apoyos educativos{' '}
-              <span className="text-primary">en minutos,</span>{' '}
-              no en días
+              Conectamos centros educativos con{' '}
+              <span className="text-primary">los mejores profesionales</span>{' '}
+              de apoyo
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
               Inclusia conecta centros educativos y entidades con profesionales de apoyo
