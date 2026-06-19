@@ -259,7 +259,9 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
                             {offer.salary_min.toLocaleString('es-ES')}€
                             {offer.salary_max && ` – ${offer.salary_max.toLocaleString('es-ES')}€`}
                           </p>
-                          <p className="text-xs text-muted-foreground">bruto/año</p>
+                          <p className="text-xs text-muted-foreground">
+                            {offer.salary_period === 'hour' ? 'bruto/hora' : offer.salary_period === 'month' ? 'bruto/mes' : 'bruto/año'}
+                          </p>
                         </div>
                       )}
                     </div>

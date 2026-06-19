@@ -46,6 +46,7 @@ export default function NewOfferPage() {
   const [contractType, setContractType] = useState('')
   const [salaryMin, setSalaryMin] = useState('')
   const [salaryMax, setSalaryMax] = useState('')
+  const [salaryPeriod, setSalaryPeriod] = useState<'hour' | 'month' | 'year'>('year')
   const [requiredExperience, setRequiredExperience] = useState('0')
   const [startDate, setStartDate] = useState('')
 
@@ -89,6 +90,7 @@ export default function NewOfferPage() {
       contract_type: contractType || null,
       salary_min: salaryMin ? parseFloat(salaryMin) : null,
       salary_max: salaryMax ? parseFloat(salaryMax) : null,
+      salary_period: salaryPeriod,
       required_experience_years: parseInt(requiredExperience) || 0,
       start_date: startDate || null,
       status: 'active',
@@ -253,26 +255,35 @@ export default function NewOfferPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="salaryMin">Salario mínimo (€/año)</Label>
+            <div>
+              <Label className="mb-2 block">Salario (€)</Label>
+              <div className="flex gap-2 items-center flex-wrap">
                 <Input
                   id="salaryMin"
                   type="number"
-                  placeholder="18000"
+                  placeholder="Mínimo"
+                  className="w-32"
                   value={salaryMin}
                   onChange={(e) => setSalaryMin(e.target.value)}
                 />
-              </div>
-              <div>
-                <Label htmlFor="salaryMax">Salario máximo (€/año)</Label>
+                <span className="text-muted-foreground text-sm">–</span>
                 <Input
                   id="salaryMax"
                   type="number"
-                  placeholder="22000"
+                  placeholder="Máximo"
+                  className="w-32"
                   value={salaryMax}
                   onChange={(e) => setSalaryMax(e.target.value)}
                 />
+                <select
+                  value={salaryPeriod}
+                  onChange={(e) => setSalaryPeriod(e.target.value as 'hour' | 'month' | 'year')}
+                  className="border border-input rounded-md px-3 py-2 text-sm bg-background"
+                >
+                  <option value="hour">por hora</option>
+                  <option value="month">al mes</option>
+                  <option value="year">al año</option>
+                </select>
               </div>
             </div>
             <div>

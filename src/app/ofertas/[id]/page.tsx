@@ -183,7 +183,9 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
                       <Euro className="h-4 w-4" />
                       {offer.salary_min.toLocaleString('es-ES')}
                       {offer.salary_max ? ` – ${offer.salary_max.toLocaleString('es-ES')}` : '+'}
-                      <span className="text-sm font-normal text-muted-foreground">/año</span>
+                      <span className="text-sm font-normal text-muted-foreground">
+                        {offer.salary_period === 'hour' ? '/hora' : offer.salary_period === 'month' ? '/mes' : '/año'}
+                      </span>
                     </p>
                   </div>
                 )}
