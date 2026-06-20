@@ -34,9 +34,16 @@ export default async function ProfilePage() {
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto">
       <BackButton href="/dashboard" label="Panel" />
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Mi Perfil</h1>
-        <p className="text-muted-foreground">Cuanto más completo esté tu perfil, más visible serás para los centros.</p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Mi Perfil</h1>
+          <p className="text-muted-foreground">Cuanto más completo esté tu perfil, más visible serás para los centros.</p>
+        </div>
+        {professionalProfile?.plan === 'premium' && (
+          <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-sm font-semibold px-3 py-1 rounded-full border border-amber-300 shrink-0">
+            ⭐ Premium
+          </span>
+        )}
       </div>
       <ProfessionalProfileForm
         profile={profile}

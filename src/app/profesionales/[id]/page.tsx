@@ -96,7 +96,14 @@ export default async function ProfessionalPublicPage({ params }: { params: Promi
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary font-bold text-2xl">
                   {initials}
                 </div>
-                <h1 className="text-xl font-bold mb-1">{name}</h1>
+                <h1 className="text-xl font-bold mb-1 flex items-center justify-center gap-2">
+                  {name}
+                  {prof.plan === 'premium' && (
+                    <span title="Profesional Premium" className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full border border-amber-300">
+                      ⭐ Premium
+                    </span>
+                  )}
+                </h1>
                 {profile?.city && (
                   <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mb-3">
                     <MapPin className="h-3.5 w-3.5" />
