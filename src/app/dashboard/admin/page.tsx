@@ -49,7 +49,7 @@ async function getMetrics() {
     supabase.from('applications').select('id', { count: 'exact', head: true })
       .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
     supabase.from('professional_profiles').select('id', { count: 'exact', head: true }).eq('available_immediately', true),
-    supabase.from('job_offers').select('id, title, city, is_urgent, status, created_at')
+    supabase.from('job_offers').select('id, title, city, is_urgent, status, created_at, applications(id)')
       .order('created_at', { ascending: false })
       .limit(8),
     supabase.from('company_profiles')
@@ -236,6 +236,9 @@ export default async function AdminPage() {
                       <Badge variant={offer.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                         {offer.status === 'active' ? 'Activa' : 'Cerrada'}
                       </Badge>
+                      <span className="text-xs font-semibold text-primary whitespace-nowrap">
+                        {(offer.applications as any[])?.length ?? 0} candidatura{((offer.applications as any[])?.length ?? 0) !== 1 ? 's' : ''}
+                      </span>
                     </div>
                   </li>
                 ))}
