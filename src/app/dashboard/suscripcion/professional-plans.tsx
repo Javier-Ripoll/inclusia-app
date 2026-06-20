@@ -31,9 +31,11 @@ interface Props {
 export function ProfessionalPlans({ currentPlan }: Props) {
   const isPremium = currentPlan === 'premium'
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleUpgrade() {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
@@ -45,9 +47,13 @@ export function ProfessionalPlans({ currentPlan }: Props) {
         }),
       })
       const data = await res.json()
-      if (data.url) window.location.href = data.url
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setError(data.error ?? 'No se pudo iniciar el pago. Inténtalo de nuevo.')
+      }
     } catch (e) {
-      console.error(e)
+      setError('Error de conexión. Inténtalo de nuevo.')
     } finally {
       setLoading(false)
     }
@@ -141,6 +147,9 @@ export function ProfessionalPlans({ currentPlan }: Props) {
               <p className="text-xs text-center text-muted-foreground mt-2">
                 Cancela cuando quieras · Sin permanencia
               </p>
+            )}
+            {error && (
+              <p className="text-xs text-center text-red-500 mt-2">{error}</p>
             )}
           </CardContent>
           </Card>
