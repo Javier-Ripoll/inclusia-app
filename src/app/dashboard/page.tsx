@@ -72,7 +72,23 @@ export default async function DashboardPage() {
       <div className="p-6 md:p-8 max-w-5xl mx-auto">
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Hola, {profile?.full_name?.split(' ')[0]} 👋</h1>
+            <h1 className="text-2xl font-bold">
+              Hola,{' '}
+              {prof?.plan === 'premium' ? (
+                <span style={{
+                  background: 'linear-gradient(90deg, #b8860b, #ffd700, #daa520, #ffd700, #b8860b)',
+                  backgroundSize: '200% auto',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  animation: 'shimmer 3s linear infinite',
+                }}>
+                  {profile?.full_name?.split(' ')[0]}
+                </span>
+              ) : (
+                profile?.full_name?.split(' ')[0]
+              )} 👋
+            </h1>
             <p className="text-muted-foreground text-sm mt-1">
               {prof?.plan === 'premium'
                 ? 'Tienes acceso prioritario a todas las ofertas urgentes.'
