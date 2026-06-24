@@ -72,7 +72,6 @@ export async function POST(req: NextRequest) {
     const subscription = event.data.object as Stripe.Subscription
     const customerId = subscription.customer as string
 
-    // Find user by stripe_customer_id and downgrade plan
     const { data: prof } = await supabase
       .from('professional_profiles')
       .select('id')
@@ -89,6 +88,55 @@ export async function POST(req: NextRequest) {
         .from('company_profiles')
         .update({ plan: 'basic', subscription_status: 'cancelled', stripe_subscription_id: null })
         .eq('stripe_customer_id', customerId)
+    }
+  }
+
+  // Pago mensual fallido — marcar como past_due pero mantener acceso hasta que Stripe cancele
+  if (event.type === 'invoice.payment_failed') {
+    const invoice = event.data.object as Stripe.Invoice
+    const customerId = invoice.customer as string
+
+    const { data: prof } = await supabase
+      .from('professional_profiles')
+      .select('id')
+      .eq('stripe_customer_id', customerId)
+      .single()
+
+    if (prof) {
+      await supabase
+        .from('professional_profiles')
+        .update({ subscription_status: 'past_due' })
+        .eq('stripe_customer_id', customerId)
+    } else {
+      await supabase
+        .from('company_profiles')
+        .update({ subscription_status: 'past_due' })
+        .eq('stripe_customer_id', customerId)
+    }
+  }
+
+  // Renovación mensual exitosa — confirmar que sigue activo
+  if (event.type === 'invoice.payment_succeeded') {
+    const invoice = event.data.object as Stripe.Invoice
+    const customerId = invoice.customer as string
+    if (invoice.billing_reason === 'subscription_cycle') {
+      const { data: prof } = await supabase
+        .from('professional_profiles')
+        .select('id')
+        .eq('stripe_customer_id', customerId)
+        .single()
+
+      if (prof) {
+        await supabase
+          .from('professional_profiles')
+          .update({ subscription_status: 'active' })
+          .eq('stripe_customer_id', customerId)
+      } else {
+        await supabase
+          .from('company_profiles')
+          .update({ subscription_status: 'active' })
+          .eq('stripe_customer_id', customerId)
+      }
     }
   }
 
