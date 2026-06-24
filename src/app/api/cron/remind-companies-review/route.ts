@@ -23,7 +23,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Get all companies with active offers that have pending applications
+  // Only look at applications created in the last 3 hours
+  const since = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+
   const { data: pendingApps } = await supabase
     .from('applications')
     .select(`
@@ -34,6 +36,7 @@ export async function GET(req: NextRequest) {
     `)
     .eq('status', 'pending')
     .eq('job_offers.status', 'active')
+    .gte('created_at', since)
 
   if (!pendingApps || pendingApps.length === 0) {
     return NextResponse.json({ emailed: 0 })
@@ -98,7 +101,7 @@ export async function GET(req: NextRequest) {
       await transporter.sendMail({
         from: `"Inclusia" <${process.env.GMAIL_USER}>`,
         to: email,
-        subject: `${company.company_name}, tienes ${data.pendingCount} candidatura${data.pendingCount !== 1 ? 's' : ''} esperando revisión`,
+        subject: `${company.company_name}, tienes ${data.pendingCount} nueva${data.pendingCount !== 1 ? 's' : ''} candidatura${data.pendingCount !== 1 ? 's' : ''} en las últimas horas`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
             <div style="background: #4f46e5; padding: 24px 32px; border-radius: 12px 12px 0 0;">
@@ -110,7 +113,7 @@ export async function GET(req: NextRequest) {
               <p style="color: #374151; font-size: 16px; margin: 0 0 16px;">Hola ${company.company_name},</p>
 
               <p style="color: #374151; font-size: 15px; margin: 0 0 24px; line-height: 1.6;">
-                Tienes <strong>${data.pendingCount} candidatura${data.pendingCount !== 1 ? 's' : ''} sin revisar</strong> en tus ofertas activas. No dejes pasar a los mejores profesionales.
+                Tienes <strong>${data.pendingCount} nueva${data.pendingCount !== 1 ? 's' : ''} candidatura${data.pendingCount !== 1 ? 's' : ''}</strong> en las últimas horas. No dejes pasar a los mejores profesionales.
               </p>
 
               <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 24px;">

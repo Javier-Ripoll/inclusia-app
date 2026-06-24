@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/remind-companies-review",
-      "schedule": "0 9 */3 * *"
+      "schedule": "0 */3 * * *"
     }
   ]
 }
