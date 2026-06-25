@@ -9,7 +9,7 @@ import { ApplicationActions } from './application-actions'
 import { StartChatButton } from './start-chat-button'
 import {
   ArrowLeft, MapPin, Briefcase, Clock, Users,
-  GraduationCap, Star, CheckCircle, Zap
+  GraduationCap, Star, CheckCircle, Zap, Pencil
 } from 'lucide-react'
 
 export default async function OfferDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -59,6 +59,11 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <h1 className="text-2xl font-bold">{offer.title}</h1>
+            <Link href={`/dashboard/ofertas/editar/${id}`}>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                <Pencil className="h-3.5 w-3.5" /> Editar
+              </Button>
+            </Link>
             {offer.is_urgent && <Badge variant="destructive" className="gap-1"><Zap className="h-3 w-3" />Urgente</Badge>}
             <Badge variant={offer.status === 'active' ? 'default' : 'secondary'}>
               {offer.status === 'active' ? 'Activa' : offer.status === 'covered' ? 'Cubierta' : 'Cerrada'}
