@@ -41,7 +41,6 @@ const PLANS = [
       'Notificaciones a profesionales de la zona',
       'Candidatos disponibles ahora destacados',
       'Estadísticas de candidaturas',
-      'Gestión de equipo (altas, datos, nóminas)',
       'Soporte prioritario',
     ],
     cta: 'Activar Pro',
@@ -57,7 +56,6 @@ const PLANS = [
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_COMPANY_PREMIUM,
     features: [
       'Todo lo de Pro',
-      'Gestión de equipo avanzada',
       'Matching automático con IA 🔜',
       'Acceso a base de datos completa de profesionales',
       'Informes mensuales de cobertura',
