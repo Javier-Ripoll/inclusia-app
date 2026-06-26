@@ -9,7 +9,7 @@ import { NotificationBell } from '@/components/notifications/notification-bell'
 import { UnreadMessagesBadge } from '@/components/chat/unread-messages-badge'
 import {
   LayoutDashboard, User, Briefcase, Users, Bell, CreditCard,
-  MessageSquare, LogOut
+  MessageSquare, LogOut, UserCog
 } from 'lucide-react'
 import { LogoutButton } from '@/components/layout/logout-button'
 
@@ -26,6 +26,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
   const profile = profileData as { full_name: string | null; role: string; onboarding_completed: boolean } | null
   const isProfessional = profile?.role === 'professional'
+
+  const { data: companyData } = !isProfessional
+    ? await supabase.from('company_profiles').select('plan').eq('user_id', user.id).single()
+    : { data: null }
+  const companyHasTeam = companyData?.plan && companyData.plan !== 'basic'
 
   // Redirect to onboarding if not completed yet
   if (profile && !profile.onboarding_completed) redirect('/onboarding')
@@ -59,6 +64,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         { href: '/dashboard/ofertas', icon: Briefcase, label: 'Mis Ofertas' },
         { href: '/dashboard/candidatos', icon: Users, label: 'Candidatos' },
         { href: '/dashboard/chat', icon: MessageSquare, label: 'Mensajes' },
+        ...(companyHasTeam ? [{ href: '/dashboard/equipo', icon: UserCog, label: 'Equipo' }] : []),
         { href: '/dashboard/suscripcion', icon: CreditCard, label: 'Plan' },
       ]
 
