@@ -61,7 +61,7 @@ const PLANS = [
       'Matching automático con IA 🔜',
       'Acceso a base de datos completa de profesionales',
       'Informes mensuales de cobertura',
-      'Gestor de cuenta dedicado',
+      'Gestor de equipo dedicado',
       'Integraciones con sistemas de RRHH',
     ],
     cta: 'Activar Premium',
