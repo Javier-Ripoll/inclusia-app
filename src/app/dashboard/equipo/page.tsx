@@ -18,10 +18,6 @@ export default async function TeamPage() {
 
   if (!company) redirect('/dashboard')
 
-  if (company.plan === 'basic' || !company.plan) {
-    redirect('/dashboard/suscripcion')
-  }
-
   const { data: members } = await supabase
     .from('team_members')
     .select('*')

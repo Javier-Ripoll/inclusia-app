@@ -27,10 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const profile = profileData as { full_name: string | null; role: string; onboarding_completed: boolean } | null
   const isProfessional = profile?.role === 'professional'
 
-  const { data: companyData } = !isProfessional
-    ? await supabase.from('company_profiles').select('plan').eq('user_id', user.id).single()
-    : { data: null }
-  const companyHasTeam = companyData?.plan && companyData.plan !== 'basic'
+  const companyHasTeam = !isProfessional
 
   // Redirect to onboarding if not completed yet
   if (profile && !profile.onboarding_completed) redirect('/onboarding')
