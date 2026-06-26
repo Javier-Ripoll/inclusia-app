@@ -56,10 +56,10 @@ const PLANS = [
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_COMPANY_PREMIUM,
     features: [
       'Todo lo de Pro',
+      'Gestión de equipo (altas, datos y nóminas)',
       'Matching automático con IA 🔜',
       'Acceso a base de datos completa de profesionales',
       'Informes mensuales de cobertura',
-      'Gestor de equipo dedicado',
       'Integraciones con sistemas de RRHH',
     ],
     cta: 'Activar Premium',
