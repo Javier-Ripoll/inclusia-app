@@ -116,8 +116,8 @@ export function TeamClient({ companyId, companyName, members: initialMembers }: 
         </div>
 
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="h-4 w-4" /> Añadir empleado</Button>
+          <DialogTrigger>
+            <Button className="gap-2" type="button"><Plus className="h-4 w-4" /> Añadir empleado</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
