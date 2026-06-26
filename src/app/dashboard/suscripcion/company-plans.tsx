@@ -107,14 +107,14 @@ export function CompanyPlans({ currentPlan }: Props) {
           const Icon = plan.icon
 
           return (
-            <div key={plan.key} className="relative flex flex-col">
+            <div key={plan.key} className="relative flex flex-col pt-5">
               {isCurrent && (
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
                   <Badge className="bg-primary text-white text-xs px-3 shadow-sm whitespace-nowrap">Plan actual</Badge>
                 </div>
               )}
               {plan.badge && !isCurrent && (
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
                   <Badge variant="secondary" className="text-xs px-3 shadow-sm whitespace-nowrap">{plan.badge}</Badge>
                 </div>
               )}

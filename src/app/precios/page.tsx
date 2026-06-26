@@ -151,10 +151,10 @@ export default function PricingPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               {PROFESSIONAL_PLANS.map((plan) => (
-                <Card key={plan.name} className={`relative ${plan.highlight ? 'border-2 border-primary shadow-lg' : ''}`}>
+                <Card key={plan.name} className={`relative overflow-visible ${plan.highlight ? 'border-2 border-primary shadow-lg' : ''}`}>
                   {plan.badge && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="text-xs">{plan.badge}</Badge>
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                      <Badge className="text-xs shadow-sm">{plan.badge}</Badge>
                     </div>
                   )}
                   <CardHeader>
@@ -186,10 +186,10 @@ export default function PricingPage() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {COMPANY_PLANS.map((plan) => (
-                <Card key={plan.name} className={`relative ${plan.highlight ? 'border-2 border-primary shadow-lg' : ''}`}>
+                <Card key={plan.name} className={`relative overflow-visible ${plan.highlight ? 'border-2 border-primary shadow-lg' : ''}`}>
                   {plan.badge && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="text-xs">{plan.badge}</Badge>
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                      <Badge className="text-xs shadow-sm">{plan.badge}</Badge>
                     </div>
                   )}
                   <CardHeader>

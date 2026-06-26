@@ -69,11 +69,11 @@ export function ProfessionalPlans({ currentPlan }: Props) {
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-6 mt-4 pt-5 items-stretch">
+      <div className="grid sm:grid-cols-2 gap-6 mt-4 pt-6 items-stretch">
         {/* Free */}
         <div className="relative h-full">
           {!isPremium && (
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
               <Badge className="bg-primary text-white text-xs px-3 shadow-sm whitespace-nowrap">Plan actual</Badge>
             </div>
           )}
@@ -109,7 +109,7 @@ export function ProfessionalPlans({ currentPlan }: Props) {
         {/* Premium */}
         <div className="relative h-full">
           {isPremium && (
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
               <Badge className="bg-primary text-white text-xs px-3 shadow-sm whitespace-nowrap">Plan actual</Badge>
             </div>
           )}
