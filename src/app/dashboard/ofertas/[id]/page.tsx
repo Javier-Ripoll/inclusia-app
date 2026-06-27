@@ -35,12 +35,22 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
     .select(`
       *,
       professional_profiles(
-        id, user_id, bio, years_experience, specializations, availabilities, is_available, available_immediately,
-        profiles(full_name, city, province, phone)
+        id, user_id, bio, years_experience, specializations, availabilities, is_available, available_immediately
       )
     `)
     .eq('offer_id', id)
     .order('created_at', { ascending: false })
+
+  // Fetch profiles separately using user_ids from professional_profiles
+  const userIds = (applications ?? [])
+    .map((a: any) => a.professional_profiles?.user_id)
+    .filter(Boolean)
+
+  const { data: profilesData } = userIds.length > 0
+    ? await supabase.from('profiles').select('id, full_name, city, province, phone').in('id', userIds)
+    : { data: [] }
+
+  const profilesMap = Object.fromEntries((profilesData ?? []).map((p: any) => [p.id, p]))
 
   const statusCount = {
     pending: applications?.filter(a => a.status === 'pending').length ?? 0,
@@ -114,7 +124,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           <div className="space-y-4">
             {applications.map((app: any) => {
               const prof = app.professional_profiles
-              const profileData = Array.isArray(prof?.profiles) ? prof.profiles[0] : prof?.profiles
+              const profileData = profilesMap[prof?.user_id]
               return (
                 <Card key={app.id} className={`transition-all ${app.status === 'accepted' ? 'border-green-200 bg-green-50/30' : app.status === 'rejected' ? 'opacity-60' : ''}`}>
                   <CardContent className="p-5">
