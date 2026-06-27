@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -57,24 +58,28 @@ export default async function CandidatosPage({
   // Build applications query
   let query = supabase
     .from('applications')
-    .select(`
-      *,
-      job_offers(id, title, is_urgent),
-      professional_profiles(
-        id, user_id, bio, years_experience, specializations, available_immediately, plan,
-        profiles(full_name, city, phone)
-      )
-    `)
-    .in(
-      'offer_id',
-      (offers ?? []).map(o => o.id)
-    )
+    .select('*, professional_id, job_offers(id, title, is_urgent), professional_profiles(id, user_id, bio, years_experience, specializations, available_immediately, plan)')
+    .in('offer_id', (offers ?? []).map(o => o.id))
     .order('created_at', { ascending: false })
 
   if (statusFilter) query = query.eq('status', statusFilter)
   if (offerFilter) query = query.eq('offer_id', offerFilter)
 
   const { data: rawApplications } = await query
+
+  // Fetch profiles via service role to bypass RLS
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const profIds = (rawApplications ?? []).map((a: any) => a.professional_id).filter(Boolean)
+  const { data: profProfilesData } = profIds.length > 0
+    ? await serviceSupabase
+        .from('professional_profiles')
+        .select('id, user_id, profiles(full_name, city, phone)')
+        .in('id', profIds)
+    : { data: [] }
+  const profProfilesMap = Object.fromEntries((profProfilesData ?? []).map((p: any) => [p.id, p]))
 
   // Sort: premium professionals first, then by date
   const applications = (rawApplications ?? []).sort((a: any, b: any) => {
@@ -149,7 +154,8 @@ export default async function CandidatosPage({
         <div className="space-y-4">
           {applications.map((app: any) => {
             const prof = app.professional_profiles
-            const profileData = prof?.profiles
+            const profExtra = profProfilesMap[app.professional_id]
+            const profileData = Array.isArray(profExtra?.profiles) ? profExtra.profiles[0] : profExtra?.profiles
             const offer = app.job_offers
 
             return (
