@@ -52,6 +52,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
         .in('id', professionalIds)
     : { data: [] }
 
+  console.log('DEBUG profProfiles:', JSON.stringify(profProfiles?.slice(0, 1)))
   const profMap = Object.fromEntries((profProfiles ?? []).map((p: any) => [p.id, p]))
 
   const statusCount = {
