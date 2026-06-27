@@ -31,23 +31,28 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
 
   if (!offer) notFound()
 
-  // Use service role for applications + nested profiles join (RLS blocks cross-user profile reads)
   const serviceSupabase = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const { data: applications } = await serviceSupabase
+  // Fetch applications (own data, no RLS issue)
+  const { data: applications } = await supabase
     .from('applications')
-    .select(`
-      *,
-      professional_profiles(
-        id, user_id, bio, years_experience, specializations, availabilities, is_available, available_immediately,
-        profiles(full_name, city, province, phone)
-      )
-    `)
+    .select('*, professional_id')
     .eq('offer_id', id)
     .order('created_at', { ascending: false })
+
+  // Fetch professional profiles + nested profiles join via service role
+  const professionalIds = (applications ?? []).map((a: any) => a.professional_id).filter(Boolean)
+  const { data: profProfiles } = professionalIds.length > 0
+    ? await serviceSupabase
+        .from('professional_profiles')
+        .select('id, user_id, bio, years_experience, specializations, availabilities, is_available, available_immediately, profiles(full_name, city, province, phone)')
+        .in('id', professionalIds)
+    : { data: [] }
+
+  const profMap = Object.fromEntries((profProfiles ?? []).map((p: any) => [p.id, p]))
 
   const statusCount = {
     pending: applications?.filter(a => a.status === 'pending').length ?? 0,
@@ -120,7 +125,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
         {applications && applications.length > 0 ? (
           <div className="space-y-4">
             {applications.map((app: any) => {
-              const prof = app.professional_profiles
+              const prof = profMap[app.professional_id]
               const profileData = Array.isArray(prof?.profiles) ? prof.profiles[0] : prof?.profiles
               return (
                 <Card key={app.id} className={`transition-all ${app.status === 'accepted' ? 'border-green-200 bg-green-50/30' : app.status === 'rejected' ? 'opacity-60' : ''}`}>
