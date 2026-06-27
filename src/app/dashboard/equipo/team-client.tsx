@@ -294,8 +294,8 @@ function MemberCard({ member: m, onDelete, onEdit }: {
           </div>
           <div className="flex gap-1 shrink-0">
             <Dialog open={editOpen} onOpenChange={setEditOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+              <DialogTrigger>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" type="button">
                   <Pencil className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
