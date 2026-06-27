@@ -114,7 +114,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
           <div className="space-y-4">
             {applications.map((app: any) => {
               const prof = app.professional_profiles
-              const profileData = prof?.profiles
+              const profileData = Array.isArray(prof?.profiles) ? prof.profiles[0] : prof?.profiles
               return (
                 <Card key={app.id} className={`transition-all ${app.status === 'accepted' ? 'border-green-200 bg-green-50/30' : app.status === 'rejected' ? 'opacity-60' : ''}`}>
                   <CardContent className="p-5">
@@ -177,6 +177,13 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
                             professionalUserId={prof?.user_id}
                             offerTitle={offer.title}
                           />
+                          {prof?.id && (
+                            <Link href={`/profesionales/${prof.id}`} target="_blank">
+                              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                                <GraduationCap className="h-3.5 w-3.5" /> Ver perfil
+                              </Button>
+                            </Link>
+                          )}
                           <StartChatButton
                             offerId={id}
                             companyId={company.id}

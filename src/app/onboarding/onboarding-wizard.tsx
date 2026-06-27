@@ -12,7 +12,7 @@ import { Loader2, CheckCircle, ArrowRight, ArrowLeft, Zap, GraduationCap, Buildi
 import { LocationSelect } from '@/components/ui/location-select'
 
 /* ── PROFESSIONAL CONSTANTS ── */
-const SPECIALIZATIONS = [
+const SPECIALIZATIONS_MAIN = [
   { value: 'pati', label: 'PATI' },
   { value: 'tea', label: 'TEA' },
   { value: 'tdah', label: 'TDAH' },
@@ -25,6 +25,41 @@ const SPECIALIZATIONS = [
   { value: 'vision', label: 'Visión' },
   { value: 'audicion', label: 'Audición' },
 ]
+
+const SPECIALIZATIONS_EXTRA = [
+  { value: 'trabajador_social', label: 'Trabajador Social' },
+  { value: 'inclusion_social', label: 'Inclusión Social' },
+  { value: 'intervencion_vulnerables', label: 'Intervención con sectores vulnerables' },
+  { value: 'integracion_social', label: 'Integración Social' },
+  { value: 'educacion_especial', label: 'Educación Especial' },
+  { value: 'orientacion_educativa', label: 'Orientación Educativa' },
+  { value: 'psicomotricidad', label: 'Psicomotricidad' },
+  { value: 'musicoterapia', label: 'Musicoterapia' },
+  { value: 'estimulacion_temprana', label: 'Estimulación Temprana' },
+  { value: 'mediacion', label: 'Mediación' },
+  { value: 'educacion_emocional', label: 'Educación Emocional' },
+  { value: 'habilidades_sociales', label: 'Habilidades Sociales' },
+  { value: 'autismo', label: 'Autismo (ABA / EIBI)' },
+  { value: 'down', label: 'Síndrome de Down' },
+  { value: 'paralisis_cerebral', label: 'Parálisis Cerebral' },
+  { value: 'dislexia', label: 'Dislexia y DEA' },
+  { value: 'bilingue', label: 'Educación Bilingüe' },
+  { value: 'intervencion_familias', label: 'Intervención con Familias' },
+  { value: 'menores_tutela', label: 'Menores en Tutela' },
+  { value: 'inmigracion', label: 'Inmigración y Refugio' },
+  { value: 'violencia_genero', label: 'Violencia de Género' },
+  { value: 'adicciones', label: 'Adicciones' },
+  { value: 'salud_mental', label: 'Salud Mental Infantojuvenil' },
+  { value: 'gerontologia', label: 'Gerontología Social' },
+  { value: 'pedagogia_terapeutica', label: 'Pedagogía Terapéutica (PT)' },
+  { value: 'aula_convivencia', label: 'Aula de Convivencia' },
+  { value: 'lectoescritura', label: 'Lectoescritura' },
+  { value: 'matematicas_dificultad', label: 'Dificultades en Matemáticas' },
+  { value: 'superdotacion', label: 'Superdotación' },
+  { value: 'tics_tecnologia', label: 'TIC y Tecnología Educativa' },
+]
+
+const SPECIALIZATIONS = [...SPECIALIZATIONS_MAIN, ...SPECIALIZATIONS_EXTRA]
 
 const AVAILABILITIES = [
   { value: 'full_time', label: 'Jornada completa' },
@@ -62,6 +97,7 @@ export function OnboardingWizard({ role, name, professionalProfileId, companyPro
   // Professional state
   const [specializations, setSpecializations] = useState<string[]>(initialData.specializations ?? [])
   const [availabilities, setAvailabilities] = useState<string[]>(initialData.availabilities ?? [])
+  const [showMoreSpecs, setShowMoreSpecs] = useState(false)
   const [availableNow, setAvailableNow] = useState(false)
   const [yearsExp, setYearsExp] = useState<number>(initialData.years_experience ?? 0)
   const [bio, setBio] = useState<string>(initialData.bio ?? '')
@@ -126,21 +162,46 @@ export function OnboardingWizard({ role, name, professionalProfileId, companyPro
       subtitle: 'Selecciona las áreas en las que trabajas. Puedes elegir varias.',
       icon: <GraduationCap className="h-6 w-6 text-primary" />,
       content: (
-        <div className="flex flex-wrap gap-2">
-          {SPECIALIZATIONS.map(s => (
+        <div className="relative">
+          <div className="flex flex-wrap gap-2">
+            {SPECIALIZATIONS_MAIN.map(s => (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => toggleItem(specializations, setSpecializations, s.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${
+                  specializations.includes(s.value)
+                    ? 'border-primary bg-primary text-white'
+                    : 'border-border hover:border-primary/40'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+            {showMoreSpecs && SPECIALIZATIONS_EXTRA.map(s => (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => toggleItem(specializations, setSpecializations, s.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${
+                  specializations.includes(s.value)
+                    ? 'border-primary bg-primary text-white'
+                    : 'border-border hover:border-primary/40'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-end mt-3">
             <button
-              key={s.value}
               type="button"
-              onClick={() => toggleItem(specializations, setSpecializations, s.value)}
-              className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${
-                specializations.includes(s.value)
-                  ? 'border-primary bg-primary text-white'
-                  : 'border-border hover:border-primary/40'
-              }`}
+              onClick={() => setShowMoreSpecs(!showMoreSpecs)}
+              className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-full border border-primary/30 hover:border-primary/60 bg-primary/5"
             >
-              {s.label}
+              {showMoreSpecs ? 'Ver menos' : `+${SPECIALIZATIONS_EXTRA.length} más`}
             </button>
-          ))}
+          </div>
         </div>
       ),
       canContinue: specializations.length > 0,
