@@ -5,14 +5,14 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { BackButton } from '@/components/ui/back-button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger
 } from '@/components/ui/dialog'
-import { Plus, Trash2, Phone, Mail, Euro, Loader2, Users } from 'lucide-react'
+import { Plus, Trash2, Phone, Mail, Euro, Loader2, Users, Pencil } from 'lucide-react'
 
 interface Member {
   id: string
@@ -39,58 +39,145 @@ const SALARY_PERIOD_LABELS: Record<string, string> = {
   hour: '/hora', month: '/mes', year: '/año'
 }
 
+function MemberForm({
+  initial,
+  onSubmit,
+  onCancel,
+  saving,
+  error,
+}: {
+  initial: Partial<Member>
+  onSubmit: (data: Partial<Member>) => void
+  onCancel: () => void
+  saving: boolean
+  error: string | null
+}) {
+  const [fullName, setFullName] = useState(initial.full_name ?? '')
+  const [email, setEmail] = useState(initial.email ?? '')
+  const [phone, setPhone] = useState(initial.phone ?? '')
+  const [role, setRole] = useState(initial.role ?? '')
+  const [department, setDepartment] = useState(initial.department ?? '')
+  const [startDate, setStartDate] = useState(initial.start_date ?? '')
+  const [salary, setSalary] = useState(initial.salary ? String(initial.salary) : '')
+  const [salaryPeriod, setSalaryPeriod] = useState(initial.salary_period ?? 'month')
+  const [contractType, setContractType] = useState(initial.contract_type ?? '')
+  const [notes, setNotes] = useState(initial.notes ?? '')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSubmit({ full_name: fullName, email, phone, role, department, start_date: startDate, salary: salary ? parseFloat(salary) : undefined, salary_period: salaryPeriod, contract_type: contractType, notes })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+      {error && <p className="text-sm text-red-500">{error}</p>}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="col-span-2">
+          <Label>Nombre completo *</Label>
+          <Input value={fullName} onChange={e => setFullName(e.target.value)} required />
+        </div>
+        <div>
+          <Label>Email</Label>
+          <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
+        </div>
+        <div>
+          <Label>Teléfono</Label>
+          <Input value={phone} onChange={e => setPhone(e.target.value)} />
+        </div>
+        <div>
+          <Label>Puesto / Cargo</Label>
+          <Input placeholder="PATI, Logopeda..." value={role} onChange={e => setRole(e.target.value)} />
+        </div>
+        <div>
+          <Label>Departamento</Label>
+          <Input placeholder="Apoyo educativo..." value={department} onChange={e => setDepartment(e.target.value)} />
+        </div>
+        <div>
+          <Label>Fecha de alta</Label>
+          <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+        </div>
+        <div>
+          <Label>Tipo de contrato</Label>
+          <Input placeholder="Indefinido, temporal..." value={contractType} onChange={e => setContractType(e.target.value)} />
+        </div>
+        <div>
+          <Label>Salario (€)</Label>
+          <Input type="number" placeholder="1500" value={salary} onChange={e => setSalary(e.target.value)} />
+        </div>
+        <div>
+          <Label>Período</Label>
+          <select value={salaryPeriod} onChange={e => setSalaryPeriod(e.target.value)}
+            className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background">
+            <option value="hour">Por hora</option>
+            <option value="month">Al mes</option>
+            <option value="year">Al año</option>
+          </select>
+        </div>
+        <div className="col-span-2">
+          <Label>Notas</Label>
+          <Input placeholder="Cualquier información adicional..." value={notes} onChange={e => setNotes(e.target.value)} />
+        </div>
+      </div>
+      <div className="flex gap-2 justify-end pt-2">
+        <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+        <Button type="submit" disabled={saving}>
+          {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          Guardar
+        </Button>
+      </div>
+    </form>
+  )
+}
+
 export function TeamClient({ companyId, companyName, members: initialMembers }: Props) {
   const [members, setMembers] = useState<Member[]>(initialMembers)
-  const [open, setOpen] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [role, setRole] = useState('')
-  const [department, setDepartment] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [salary, setSalary] = useState('')
-  const [salaryPeriod, setSalaryPeriod] = useState('month')
-  const [contractType, setContractType] = useState('')
-  const [notes, setNotes] = useState('')
-
-  const resetForm = () => {
-    setFullName(''); setEmail(''); setPhone(''); setRole('')
-    setDepartment(''); setStartDate(''); setSalary(''); setSalaryPeriod('month')
-    setContractType(''); setNotes(''); setError(null)
-  }
-
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!fullName.trim()) { setError('El nombre es obligatorio.'); return }
-    setSaving(true)
-    setError(null)
+  const handleAdd = async (data: Partial<Member>) => {
+    if (!data.full_name?.trim()) { setError('El nombre es obligatorio.'); return }
+    setSaving(true); setError(null)
     const supabase = createClient()
-    const { data, error: err } = await supabase.from('team_members').insert({
+    const { data: inserted, error: err } = await supabase.from('team_members').insert({
       company_id: companyId,
-      full_name: fullName,
-      email: email || null,
-      phone: phone || null,
-      role: role || null,
-      department: department || null,
-      start_date: startDate || null,
-      salary: salary ? parseFloat(salary) : null,
-      salary_period: salaryPeriod,
-      contract_type: contractType || null,
-      notes: notes || null,
+      full_name: data.full_name,
+      email: data.email || null,
+      phone: data.phone || null,
+      role: data.role || null,
+      department: data.department || null,
+      start_date: data.start_date || null,
+      salary: data.salary ?? null,
+      salary_period: data.salary_period,
+      contract_type: data.contract_type || null,
+      notes: data.notes || null,
     }).select().single()
 
-    if (err || !data) {
-      setError('Error al añadir el empleado.')
-      setSaving(false)
-      return
-    }
-    setMembers(prev => [data, ...prev])
-    resetForm()
-    setOpen(false)
+    if (err || !inserted) { setError('Error al añadir el empleado.'); setSaving(false); return }
+    setMembers(prev => [inserted, ...prev])
+    setAddOpen(false)
     setSaving(false)
+  }
+
+  const handleEdit = async (id: string, data: Partial<Member>) => {
+    if (!data.full_name?.trim()) return
+    const supabase = createClient()
+    const { data: updated, error: err } = await supabase.from('team_members').update({
+      full_name: data.full_name,
+      email: data.email || null,
+      phone: data.phone || null,
+      role: data.role || null,
+      department: data.department || null,
+      start_date: data.start_date || null,
+      salary: data.salary ?? null,
+      salary_period: data.salary_period,
+      contract_type: data.contract_type || null,
+      notes: data.notes || null,
+    }).eq('id', id).select().single()
+
+    if (!err && updated) {
+      setMembers(prev => prev.map(m => m.id === id ? updated : m))
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -115,7 +202,7 @@ export function TeamClient({ companyId, companyName, members: initialMembers }: 
           <p className="text-muted-foreground text-sm mt-1">{companyName} · {active.length} empleado{active.length !== 1 ? 's' : ''} activo{active.length !== 1 ? 's' : ''}</p>
         </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger>
             <Button className="gap-2" type="button"><Plus className="h-4 w-4" /> Añadir empleado</Button>
           </DialogTrigger>
@@ -123,63 +210,13 @@ export function TeamClient({ companyId, companyName, members: initialMembers }: 
             <DialogHeader>
               <DialogTitle>Nuevo empleado</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAdd} className="space-y-4 pt-2">
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <Label>Nombre completo *</Label>
-                  <Input value={fullName} onChange={e => setFullName(e.target.value)} required />
-                </div>
-                <div>
-                  <Label>Email</Label>
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Teléfono</Label>
-                  <Input value={phone} onChange={e => setPhone(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Puesto / Cargo</Label>
-                  <Input placeholder="PATI, Logopeda..." value={role} onChange={e => setRole(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Departamento</Label>
-                  <Input placeholder="Apoyo educativo..." value={department} onChange={e => setDepartment(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Fecha de alta</Label>
-                  <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Tipo de contrato</Label>
-                  <Input placeholder="Indefinido, temporal..." value={contractType} onChange={e => setContractType(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Salario (€)</Label>
-                  <Input type="number" placeholder="1500" value={salary} onChange={e => setSalary(e.target.value)} />
-                </div>
-                <div>
-                  <Label>Período</Label>
-                  <select value={salaryPeriod} onChange={e => setSalaryPeriod(e.target.value)}
-                    className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background">
-                    <option value="hour">Por hora</option>
-                    <option value="month">Al mes</option>
-                    <option value="year">Al año</option>
-                  </select>
-                </div>
-                <div className="col-span-2">
-                  <Label>Notas</Label>
-                  <Input placeholder="Cualquier información adicional..." value={notes} onChange={e => setNotes(e.target.value)} />
-                </div>
-              </div>
-              <div className="flex gap-2 justify-end pt-2">
-                <Button type="button" variant="outline" onClick={() => { resetForm(); setOpen(false) }}>Cancelar</Button>
-                <Button type="submit" disabled={saving}>
-                  {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  Añadir
-                </Button>
-              </div>
-            </form>
+            <MemberForm
+              initial={{}}
+              onSubmit={handleAdd}
+              onCancel={() => setAddOpen(false)}
+              saving={saving}
+              error={error}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -197,13 +234,13 @@ export function TeamClient({ companyId, companyName, members: initialMembers }: 
           {active.length > 0 && (
             <>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Activos</p>
-              {active.map(m => <MemberCard key={m.id} member={m} onDelete={handleDelete} />)}
+              {active.map(m => <MemberCard key={m.id} member={m} onDelete={handleDelete} onEdit={handleEdit} />)}
             </>
           )}
           {inactive.length > 0 && (
             <>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-6 mb-2">Inactivos</p>
-              {inactive.map(m => <MemberCard key={m.id} member={m} onDelete={handleDelete} />)}
+              {inactive.map(m => <MemberCard key={m.id} member={m} onDelete={handleDelete} onEdit={handleEdit} />)}
             </>
           )}
         </div>
@@ -216,8 +253,23 @@ export function TeamClient({ companyId, companyName, members: initialMembers }: 
   )
 }
 
-function MemberCard({ member: m, onDelete }: { member: Member; onDelete: (id: string) => void }) {
+function MemberCard({ member: m, onDelete, onEdit }: {
+  member: Member
+  onDelete: (id: string) => void
+  onEdit: (id: string, data: Partial<Member>) => Promise<void>
+}) {
+  const [editOpen, setEditOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  const handleEdit = async (data: Partial<Member>) => {
+    setSaving(true)
+    await onEdit(m.id, data)
+    setSaving(false)
+    setEditOpen(false)
+  }
+
   const initials = m.full_name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+
   return (
     <Card>
       <CardContent className="p-4">
@@ -240,9 +292,30 @@ function MemberCard({ member: m, onDelete }: { member: Member; onDelete: (id: st
             </div>
             {m.notes && <p className="text-xs text-muted-foreground mt-1 italic">{m.notes}</p>}
           </div>
-          <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-red-500" onClick={() => onDelete(m.id)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-1 shrink-0">
+            <Dialog open={editOpen} onOpenChange={setEditOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Editar empleado</DialogTitle>
+                </DialogHeader>
+                <MemberForm
+                  initial={m}
+                  onSubmit={handleEdit}
+                  onCancel={() => setEditOpen(false)}
+                  saving={saving}
+                  error={null}
+                />
+              </DialogContent>
+            </Dialog>
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500" onClick={() => onDelete(m.id)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
