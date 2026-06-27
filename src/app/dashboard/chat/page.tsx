@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { Card, CardContent } from '@/components/ui/card'
 import { MessageSquare, Clock } from 'lucide-react'
 
@@ -24,16 +25,22 @@ export default async function ChatPage() {
 
   const isProfessional = profile?.role === 'professional'
 
-  // Load conversations with last message + other party info
+  // Load conversations
   const { data: conversations } = await supabase
     .from('conversations')
-    .select(`
-      id, last_message_at, offer_id,
-      job_offers ( title ),
-      company_profiles ( id, company_name ),
-      professional_profiles ( id, profiles ( full_name ) )
-    `)
+    .select('id, last_message_at, offer_id, professional_profile_id, job_offers ( title ), company_profiles ( id, company_name ), professional_profiles ( id )')
     .order('last_message_at', { ascending: false })
+
+  // Fetch professional names via service role (RLS blocks cross-user reads)
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const convProfIds = (conversations ?? []).map((c: any) => c.professional_profiles?.id).filter(Boolean)
+  const { data: convProfData } = convProfIds.length > 0
+    ? await serviceSupabase.from('professional_profiles').select('id, profiles(full_name)').in('id', convProfIds)
+    : { data: [] }
+  const convProfMap = Object.fromEntries((convProfData ?? []).map((p: any) => [p.id, p]))
 
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto">
@@ -59,7 +66,9 @@ export default async function ChatPage() {
           {conversations.map((conv: any) => {
             const company = conv.company_profiles
             const prof = conv.professional_profiles
-            const profName = prof?.profiles?.full_name ?? 'Profesional'
+            const profExtra = convProfMap[prof?.id]
+            const profProfiles = Array.isArray(profExtra?.profiles) ? profExtra.profiles[0] : profExtra?.profiles
+            const profName = profProfiles?.full_name ?? 'Profesional'
             const otherName = isProfessional ? company?.company_name : profName
             const offerTitle = conv.job_offers?.title
 
