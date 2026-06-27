@@ -1,6 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -41,13 +42,18 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
     .eq('offer_id', id)
     .order('created_at', { ascending: false })
 
-  // Fetch profiles separately using user_ids from professional_profiles
+  // Use service role to bypass RLS and read applicant profiles
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   const userIds = (applications ?? [])
     .map((a: any) => a.professional_profiles?.user_id)
     .filter(Boolean)
 
   const { data: profilesData } = userIds.length > 0
-    ? await supabase.from('profiles').select('id, full_name, city, province, phone').in('id', userIds)
+    ? await serviceSupabase.from('profiles').select('id, full_name, city, province, phone').in('id', userIds)
     : { data: [] }
 
   const profilesMap = Object.fromEntries((profilesData ?? []).map((p: any) => [p.id, p]))
