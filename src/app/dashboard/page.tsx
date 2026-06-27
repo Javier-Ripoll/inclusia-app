@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -264,12 +265,26 @@ export default async function DashboardPage() {
     ids.length
       ? supabase
           .from('applications')
-          .select('id, status, created_at, job_offers(title), professional_profiles(profiles(full_name))')
+          .select('id, status, created_at, professional_id, job_offers(title)')
           .in('offer_id', ids)
           .order('created_at', { ascending: false })
           .limit(5)
       : Promise.resolve({ data: [], error: null }),
   ])
+
+  // Fetch candidate names via service role (RLS blocks cross-user profile reads)
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const recentProfIds = (recentCandidatures ?? []).map((a: any) => a.professional_id).filter(Boolean)
+  const { data: recentProfData } = recentProfIds.length > 0
+    ? await serviceSupabase
+        .from('professional_profiles')
+        .select('id, profiles(full_name)')
+        .in('id', recentProfIds)
+    : { data: [] }
+  const recentProfMap = Object.fromEntries((recentProfData ?? []).map((p: any) => [p.id, p]))
 
   const stats = [
     { label: 'Ofertas activas', value: activeCount ?? 0, icon: Briefcase, color: 'text-blue-600', href: '/dashboard/ofertas' },
@@ -403,7 +418,9 @@ export default async function DashboardPage() {
             {recentCandidatures && recentCandidatures.length > 0 ? (
               <ul className="space-y-3">
                 {(recentCandidatures as any[]).map((app) => {
-                  const name = app.professional_profiles?.profiles?.full_name ?? 'Profesional'
+                  const profEntry = recentProfMap[app.professional_id]
+                  const profProfiles = Array.isArray(profEntry?.profiles) ? profEntry.profiles[0] : profEntry?.profiles
+                  const name = profProfiles?.full_name ?? 'Profesional'
                   const offerTitle = app.job_offers?.title ?? ''
                   return (
                     <li key={app.id} className="flex items-center justify-between text-sm">
