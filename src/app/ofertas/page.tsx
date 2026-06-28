@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import { Navbar } from '@/components/layout/navbar'
 
 export const metadata: Metadata = {
-  title: 'Ofertas de empleo en apoyo educativo',
-  description: 'Encuentra ofertas de trabajo para PATI, logopedas, integradores sociales, educadores especiales y más profesionales de apoyo educativo en España.',
+  title: 'Ofertas de trabajo sector social – Terapeuta Ocupacional, Logopeda, Integrador Social, PATI',
+  description: 'Busca ofertas de trabajo en sector social: Terapeuta Ocupacional, Logopeda, Psicólogo, Integrador Social, Educador Social, Trabajador Social, PATI y más. Nuevas ofertas cada día.',
+  keywords: ['ofertas trabajo sector social', 'terapeuta ocupacional trabajo', 'logopeda empleo', 'integrador social oferta', 'PATI empleo', 'educador social', 'trabajador social'],
   alternates: { canonical: '/ofertas' },
-  openGraph: { title: 'Ofertas de empleo en apoyo educativo | Inclusia', description: 'Encuentra tu próximo trabajo en apoyo educativo. Ofertas para PATI, logopedas, integradores sociales y más.', url: 'https://inclusiajobs.com/ofertas' },
+  openGraph: { title: 'Ofertas de trabajo sector social | Inclusia', description: 'Encuentra tu próxima oferta: Terapeuta Ocupacional, Logopeda, Integrador Social, PATI y más.', url: 'https://inclusiajobs.com/ofertas' },
 }
 import { Footer } from '@/components/layout/footer'
 import { Badge } from '@/components/ui/badge'

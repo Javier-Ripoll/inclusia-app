@@ -2,8 +2,22 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Inclusia – Conectamos centros educativos con profesionales de apoyo',
-  description: 'La plataforma líder para cubrir apoyos educativos: PATI, logopedas, integradores sociales y educadores especiales. Publica o encuentra tu próxima oportunidad.',
+  title: 'Ofertas de trabajo sector social – Terapeuta Ocupacional, Logopeda, Psicólogo, Integrador Social, Educador Social, Trabajador Social, PATI | Inclusia',
+  description: 'Ofertas de trabajo en sector social y apoyo educativo: Terapeuta Ocupacional, Logopeda, Psicólogo, Integrador Social, Educador Social, Trabajador Social, PATI y más. Conectamos centros educativos con los mejores profesionales.',
+  keywords: [
+    'ofertas trabajo sector social',
+    'terapeuta ocupacional',
+    'logopeda empleo',
+    'psicologo educativo',
+    'integrador social trabajo',
+    'educador social ofertas',
+    'trabajador social empleo',
+    'PATI trabajo',
+    'empleo apoyo educativo',
+    'sustituciones educativas',
+    'empleo educacion especial',
+    'ofertas empleo logopedia',
+  ],
   alternates: { canonical: '/' },
 }
 import { createClient } from '@supabase/supabase-js'
