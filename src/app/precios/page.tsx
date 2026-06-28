@@ -1,8 +1,16 @@
 import Link from 'next/link'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
+import type { Metadata } from 'next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+
+export const metadata: Metadata = {
+  title: 'Precios y planes',
+  description: 'Planes para centros educativos y profesionales de apoyo. Empieza gratis y escala según tus necesidades.',
+  alternates: { canonical: '/precios' },
+  openGraph: { title: 'Precios y planes | Inclusia', description: 'Planes flexibles para centros educativos y profesionales de apoyo educativo.', url: 'https://inclusiajobs.com/precios' },
+}
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle, X } from 'lucide-react'
 

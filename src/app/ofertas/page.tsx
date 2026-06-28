@@ -1,4 +1,12 @@
+import type { Metadata } from 'next'
 import { Navbar } from '@/components/layout/navbar'
+
+export const metadata: Metadata = {
+  title: 'Ofertas de empleo en apoyo educativo',
+  description: 'Encuentra ofertas de trabajo para PATI, logopedas, integradores sociales, educadores especiales y más profesionales de apoyo educativo en España.',
+  alternates: { canonical: '/ofertas' },
+  openGraph: { title: 'Ofertas de empleo en apoyo educativo | Inclusia', description: 'Encuentra tu próximo trabajo en apoyo educativo. Ofertas para PATI, logopedas, integradores sociales y más.', url: 'https://inclusiajobs.com/ofertas' },
+}
 import { Footer } from '@/components/layout/footer'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'

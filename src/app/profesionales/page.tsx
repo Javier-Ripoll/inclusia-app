@@ -1,4 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Profesionales de apoyo educativo disponibles',
+  description: 'Encuentra profesionales de apoyo educativo disponibles: PATI, logopedas, integradores sociales, educadores especiales y más. Contrata directamente en Inclusia.',
+  alternates: { canonical: '/profesionales' },
+  openGraph: { title: 'Profesionales de apoyo educativo | Inclusia', description: 'Encuentra y contrata profesionales de apoyo educativo disponibles en tu zona.', url: 'https://inclusiajobs.com/profesionales' },
+}
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

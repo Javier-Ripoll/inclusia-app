@@ -96,7 +96,52 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
 
   const company = offer.company_profiles as any
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title: offer.title,
+    description: offer.description ?? offer.title,
+    datePosted: offer.created_at?.split('T')[0],
+    validThrough: offer.expires_at?.split('T')[0],
+    employmentType: offer.contract_type === 'Indefinido' ? 'FULL_TIME' : 'TEMPORARY',
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: company?.company_name ?? 'Inclusia',
+      sameAs: `https://inclusiajobs.com`,
+    },
+    jobLocation: offer.city ? {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: offer.city,
+        addressRegion: offer.province ?? '',
+        addressCountry: 'ES',
+      },
+    } : undefined,
+    baseSalary: offer.salary_min ? {
+      '@type': 'MonetaryAmount',
+      currency: 'EUR',
+      value: {
+        '@type': 'QuantitativeValue',
+        minValue: offer.salary_min,
+        maxValue: offer.salary_max ?? offer.salary_min,
+        unitText: offer.salary_period === 'hour' ? 'HOUR' : offer.salary_period === 'year' ? 'YEAR' : 'MONTH',
+      },
+    } : undefined,
+    identifier: {
+      '@type': 'PropertyValue',
+      name: 'Inclusia',
+      value: offer.id,
+    },
+    url: `https://inclusiajobs.com/ofertas/${offer.id}`,
+  }
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Link href="/ofertas" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
@@ -239,5 +284,6 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
         </div>
       </div>
     </div>
+    </>
   )
 }

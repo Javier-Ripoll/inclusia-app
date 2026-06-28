@@ -27,6 +27,34 @@ const AVAILABILITY_LABELS: Record<string, string> = {
   weekends: 'Fines de semana', on_call: 'A llamada',
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const supabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data } = await supabase
+    .from('professional_profiles')
+    .select('bio, specializations, profiles(full_name, city, province)')
+    .eq('id', id)
+    .single()
+
+  if (!data) return {}
+  const profile = Array.isArray(data.profiles) ? data.profiles[0] : data.profiles as any
+  const name = profile?.full_name ?? 'Profesional'
+  const location = [profile?.city, profile?.province].filter(Boolean).join(', ')
+  const specs = (data.specializations ?? []).slice(0, 3).join(', ')
+  const title = `${name} – Profesional de apoyo educativo${location ? ` en ${location}` : ''}`
+  const description = data.bio?.slice(0, 160) ?? `Profesional especializado en ${specs || 'apoyo educativo'} disponible en Inclusia.`
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/profesionales/${id}` },
+    openGraph: { title, description, url: `https://inclusiajobs.com/profesionales/${id}` },
+  }
+}
+
 export default async function ProfessionalPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()

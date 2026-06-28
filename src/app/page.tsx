@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Inclusia – Conectamos centros educativos con profesionales de apoyo',
+  description: 'La plataforma líder para cubrir apoyos educativos: PATI, logopedas, integradores sociales y educadores especiales. Publica o encuentra tu próxima oportunidad.',
+  alternates: { canonical: '/' },
+}
 import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
