@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ApplyButton } from './apply-button'
 import {
   ArrowLeft, MapPin, Briefcase, Clock, Calendar,
-  Euro, GraduationCap, Zap, CheckCircle, Building2, Users
+  Euro, GraduationCap, Zap, CheckCircle, Building2, Users, XCircle
 } from 'lucide-react'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -62,10 +62,11 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
     .from('job_offers')
     .select('*, company_profiles(id, company_name, description, logo_url, verified)')
     .eq('id', id)
-    .eq('status', 'active')
     .single()
 
   if (!offer) notFound()
+
+  const isClosed = offer.status !== 'active'
 
   const serviceClient = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -249,12 +250,19 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
                   </div>
                 )}
 
-                <ApplyButton
-                  offerId={id}
-                  professionalProfileId={professionalProfileId}
-                  alreadyApplied={alreadyApplied}
-                  isLoggedIn={!!user}
-                />
+                {isClosed ? (
+                  <div className="flex items-center gap-2 p-4 rounded-lg bg-gray-100 text-gray-500 text-sm font-medium">
+                    <XCircle className="h-4 w-4 flex-shrink-0" />
+                    Proceso cerrado — ya no se aceptan solicitudes
+                  </div>
+                ) : (
+                  <ApplyButton
+                    offerId={id}
+                    professionalProfileId={professionalProfileId}
+                    alreadyApplied={alreadyApplied}
+                    isLoggedIn={!!user}
+                  />
+                )}
               </CardContent>
             </Card>
 
