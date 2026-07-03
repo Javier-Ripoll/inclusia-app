@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Loader2, XCircle, CheckCircle } from 'lucide-react'
 
@@ -15,10 +14,13 @@ export function OfferStatusButton({ offerId, currentStatus }: { offerId: string;
   const toggle = async () => {
     if (!confirm(isClosed ? '¿Reabrir esta oferta?' : '¿Cerrar esta oferta? Los profesionales ya no podrán aplicar.')) return
     setLoading(true)
-    const supabase = createClient()
-    await supabase.from('job_offers').update({ status: isClosed ? 'active' : 'closed' }).eq('id', offerId)
+    const res = await fetch('/api/ofertas/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offerId, status: isClosed ? 'active' : 'closed' }),
+    })
     setLoading(false)
-    router.refresh()
+    if (res.ok) router.refresh()
   }
 
   return (
