@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ApplicationActions } from './application-actions'
 import { StartChatButton } from './start-chat-button'
-import { OfferStatusButton } from './offer-status-button'
+import { OfferActions } from '@/app/dashboard/ofertas/offer-actions'
 import {
   ArrowLeft, MapPin, Briefcase, Clock, Users,
   GraduationCap, Star, CheckCircle, Zap, Pencil
@@ -77,7 +77,7 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
                 <Pencil className="h-3.5 w-3.5" /> Editar
               </Button>
             </Link>
-            <OfferStatusButton offerId={id} currentStatus={offer.status} />
+            <OfferActions offerId={id} currentStatus={offer.status} />
             {offer.is_urgent && <Badge variant="destructive" className="gap-1"><Zap className="h-3 w-3" />Urgente</Badge>}
             <Badge variant={offer.status === 'active' ? 'default' : 'secondary'}>
               {offer.status === 'active' ? 'Activa' : offer.status === 'covered' ? 'Cubierta' : 'Cerrada'}

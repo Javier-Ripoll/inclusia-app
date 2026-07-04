@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { apiLimiter, getIp } from '@/lib/rate-limit'
 
 async function getCompanyId(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data } = await supabase
@@ -16,9 +15,6 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { success } = await apiLimiter.limit(getIp(req))
-  if (!success) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
-
   const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -51,9 +47,6 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { success } = await apiLimiter.limit(getIp(req))
-  if (!success) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
-
   const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
