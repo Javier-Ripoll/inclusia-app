@@ -24,7 +24,7 @@ export function OfferActions({ offerId, currentStatus }: Props) {
         method: action === 'delete' ? 'DELETE' : 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: action !== 'delete'
-          ? JSON.stringify({ status: action === 'close' ? 'closed' : 'active' })
+          ? JSON.stringify({ status: action === 'close' ? 'cancelled' : 'active' })
           : undefined,
       })
       const data = await res.json()

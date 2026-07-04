@@ -17,7 +17,7 @@ export function OfferStatusButton({ offerId, currentStatus }: { offerId: string;
     const res = await fetch('/api/ofertas/status', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ offerId, status: isClosed ? 'active' : 'closed' }),
+      body: JSON.stringify({ offerId, status: isClosed ? 'active' : 'cancelled' }),
     })
     setLoading(false)
     if (res.ok) router.refresh()

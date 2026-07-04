@@ -24,7 +24,7 @@ export async function PATCH(
   if (!companyId) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
 
   const { status } = await req.json()
-  if (!['active', 'closed', 'covered'].includes(status)) {
+  if (!['active', 'cancelled', 'covered'].includes(status)) {
     return NextResponse.json({ error: 'Estado no válido' }, { status: 400 })
   }
 

@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { offerId, status } = await req.json()
-  if (!offerId || !['active', 'closed', 'covered'].includes(status)) {
+  if (!offerId || !['active', 'cancelled', 'covered'].includes(status)) {
     return NextResponse.json({ error: 'Invalid params' }, { status: 400 })
   }
 

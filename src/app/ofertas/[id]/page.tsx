@@ -66,7 +66,7 @@ export default async function OfferPublicPage({ params }: { params: Promise<{ id
 
   if (!offer) notFound()
 
-  const isClosed = offer.status !== 'active'
+  const isClosed = offer.status === 'cancelled' || offer.status === 'expired'
 
   const serviceClient = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
