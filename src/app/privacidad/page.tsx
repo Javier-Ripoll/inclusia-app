@@ -1,5 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Política de privacidad',
+  description: 'Política de privacidad y protección de datos de Inclusia.',
+  robots: { index: false, follow: false },
+}
 
 export default function PrivacidadPage() {
   return (

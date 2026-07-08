@@ -98,8 +98,36 @@ export default async function HomePage() {
     { value: 'Toda España', label: 'Cobertura nacional' },
   ]
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://inclusiajobs.com/#organization',
+        name: 'Inclusia',
+        url: 'https://inclusiajobs.com',
+        logo: 'https://inclusiajobs.com/opengraph-image.png',
+        description: 'Plataforma de empleo especializada en sector social y apoyo educativo en España.',
+        sameAs: [],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://inclusiajobs.com/#website',
+        url: 'https://inclusiajobs.com',
+        name: 'Inclusia',
+        publisher: { '@id': 'https://inclusiajobs.com/#organization' },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://inclusiajobs.com/ofertas?q={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+    ],
+  }
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
       <main>
         {/* HERO */}
@@ -109,13 +137,12 @@ export default async function HomePage() {
               Cobertura de apoyo educativo en tiempo real
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-              Conectamos centros educativos con{' '}
-              <span className="text-primary">los mejores profesionales</span>{' '}
-              de apoyo
+              Ofertas de trabajo en{' '}
+              <span className="text-primary">sector social y apoyo educativo</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Inclusia conecta centros educativos y entidades con profesionales de apoyo
-              disponibles en su zona. Respuesta rápida, perfil adecuado, sin esperas.
+              Conectamos centros educativos y entidades con profesionales de apoyo disponibles:
+              PATI, Logopeda, Integrador Social, Educador Social, Terapeuta Ocupacional, Trabajador Social y más.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/auth/registro?rol=empresa">
@@ -367,6 +394,25 @@ export default async function HomePage() {
           </div>
         </section>
       </main>
+
+      {/* SEO keyword block — visually subtle, semantically rich */}
+      <section className="bg-gray-50 border-t py-10 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4 text-center">Perfiles disponibles en Inclusia</h2>
+          <div className="flex flex-wrap justify-center gap-3 text-sm text-muted-foreground">
+            {[
+              'Ofertas PATI','Empleo Logopeda','Trabajo Integrador Social','Ofertas Educador Social',
+              'Empleo Terapeuta Ocupacional','Trabajo Trabajador Social','Ofertas Psicólogo Educativo',
+              'Empleo Pedagogo','Trabajo Monitor Educativo','Ofertas Técnico Integración Social',
+              'Empleo Auxiliar Educativo','Trabajo Fisioterapeuta Educativo',
+              'Sustituciones Apoyo Educativo','Empleo Sector Social España',
+            ].map(kw => (
+              <span key={kw} className="px-3 py-1 rounded-full bg-white border text-xs">{kw}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </>
   )

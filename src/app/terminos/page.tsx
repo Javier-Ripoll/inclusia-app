@@ -1,5 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Términos y condiciones',
+  description: 'Términos y condiciones de uso de Inclusia, la plataforma de empleo en sector social y apoyo educativo.',
+  robots: { index: false, follow: false },
+}
 
 export default function TerminosPage() {
   return (
