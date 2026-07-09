@@ -119,6 +119,12 @@ export function ChatWindow({
       await supabase.from('conversations')
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId)
+      // Email notification to recipient (fire-and-forget)
+      fetch('/api/chat/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId, senderName: currentUserName }),
+      }).catch(() => {})
     }
 
     setSending(false)
