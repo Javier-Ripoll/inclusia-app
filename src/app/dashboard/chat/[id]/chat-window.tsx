@@ -123,7 +123,7 @@ export function ChatWindow({
       fetch('/api/chat/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId, senderName: currentUserName }),
+        body: JSON.stringify({ conversationId, senderName: currentUserName, senderUserId: currentUserId }),
       }).catch(() => {})
     }
 

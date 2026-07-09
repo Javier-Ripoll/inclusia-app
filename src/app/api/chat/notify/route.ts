@@ -8,15 +8,15 @@ const supabase = createClient(
 )
 
 export async function POST(req: NextRequest) {
-  const { conversationId, senderName } = await req.json()
-  if (!conversationId || !senderName) {
+  const { conversationId, senderName, senderUserId } = await req.json()
+  if (!conversationId || !senderName || !senderUserId) {
     return NextResponse.json({ error: 'Faltan datos' }, { status: 400 })
   }
 
-  // Get conversation with both participants
+  // Get conversation participants
   const { data: conv } = await supabase
     .from('conversations')
-    .select('id, professional_id, company_id, offer_id, job_offers(title)')
+    .select('id, professional_id, company_id, job_offers(title)')
     .eq('id', conversationId)
     .single()
 
@@ -39,26 +39,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Participantes no encontrados' }, { status: 404 })
   }
 
-  // Get last message to know who sent it
-  const { data: lastMsg } = await supabase
-    .from('messages')
-    .select('sender_id')
-    .eq('conversation_id', conversationId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
-
-  if (!lastMsg) return NextResponse.json({ ok: true })
-
-  // Recipient is whoever did NOT send the last message
-  const recipientUserId = lastMsg.sender_id === profProfile.user_id
+  // Recipient is whoever did NOT send the message
+  const recipientUserId = senderUserId === profProfile.user_id
     ? compProfile.user_id
     : profProfile.user_id
 
-  // Get recipient email
-  const { data: authUser } = await supabase.auth.admin.getUserById(recipientUserId)
-  const recipientEmail = authUser?.user?.email
-  if (!recipientEmail) return NextResponse.json({ ok: true })
+  // Get recipient email via listUsers
+  const { data: authData } = await supabase.auth.admin.listUsers({ perPage: 1000 })
+  const recipientEmail = (authData?.users ?? []).find(u => u.id === recipientUserId)?.email
+
+  if (!recipientEmail) return NextResponse.json({ ok: true, skipped: 'no email found' })
 
   const chatUrl = `${APP_URL}/dashboard/chat/${conversationId}`
   const offerTitle = (conv.job_offers as any)?.title
