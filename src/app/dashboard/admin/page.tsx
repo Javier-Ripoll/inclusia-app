@@ -4,8 +4,6 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { BackButton } from '@/components/ui/back-button'
-import { BlastIncompleteProfilesButton } from './blast-button'
-import { CelebrationBlastButton } from './celebration-button'
 import { OutreachBlast } from './outreach-blast'
 import {
   Users, Building2, Briefcase, FileText,
@@ -279,14 +277,6 @@ export default async function AdminPage() {
           )}
         </CardContent>
       </Card>
-
-      <div className="mt-8 p-4 border rounded-xl bg-gray-50">
-        <p className="text-sm font-medium mb-3">Acciones manuales</p>
-        <BlastIncompleteProfilesButton />
-        <div className="mt-3">
-          <CelebrationBlastButton />
-        </div>
-      </div>
 
       {/* OUTREACH EXTERNO */}
       <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 mt-8 flex items-center gap-2">
