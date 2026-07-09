@@ -120,7 +120,7 @@ export function ChatWindow({
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId)
       // Email notification to recipient (fire-and-forget)
-      fetch('/api/chat/notify', {
+      fetch('/api/mensajes/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ conversationId, senderName: currentUserName, senderUserId: currentUserId }),
