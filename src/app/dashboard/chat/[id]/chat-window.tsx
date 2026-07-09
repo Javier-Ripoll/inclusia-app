@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Send, Loader2 } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, Trash2 } from 'lucide-react'
 
 interface Message {
   id: string
@@ -40,6 +40,7 @@ export function ChatWindow({
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -131,6 +132,13 @@ export function ChatWindow({
     inputRef.current?.focus()
   }
 
+  const handleDelete = async () => {
+    if (!window.confirm('¿Eliminar esta conversación? Se borrarán todos los mensajes y no se puede deshacer.')) return
+    setDeleting(true)
+    await fetch(`/api/mensajes/${conversationId}`, { method: 'DELETE' })
+    router.push('/dashboard/chat')
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -154,6 +162,15 @@ export function ChatWindow({
           <p className="font-semibold text-sm">{otherName}</p>
           {offerTitle && <p className="text-xs text-muted-foreground truncate">Re: {offerTitle}</p>}
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground hover:text-red-500"
+          onClick={handleDelete}
+          disabled={deleting}
+        >
+          {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+        </Button>
       </div>
 
       {/* Messages */}
