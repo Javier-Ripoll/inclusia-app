@@ -62,7 +62,7 @@ export default async function ChatPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {conversations.map((conv: any) => {
             const company = conv.company_profiles
             const profExtra = convProfMap[conv.professional_id]
@@ -74,7 +74,7 @@ export default async function ChatPage() {
             return (
               <Link key={conv.id} href={`/dashboard/chat/${conv.id}`}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer hover:border-primary/30">
-                  <CardContent className="p-4 flex items-center gap-4">
+                  <CardContent className="p-5 flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-sm">
                       {otherName?.charAt(0).toUpperCase()}
                     </div>
