@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge'
 import { BackButton } from '@/components/ui/back-button'
 import { BlastIncompleteProfilesButton } from './blast-button'
 import { CelebrationBlastButton } from './celebration-button'
+import { OutreachBlast } from './outreach-blast'
 import {
   Users, Building2, Briefcase, FileText,
-  TrendingUp, UserCheck, CalendarDays, Activity
+  TrendingUp, UserCheck, CalendarDays, Activity, Send
 } from 'lucide-react'
 
 const ADMIN_EMAIL = 'javier2003.jr@gmail.com'
@@ -286,6 +287,22 @@ export default async function AdminPage() {
           <CelebrationBlastButton />
         </div>
       </div>
+
+      {/* OUTREACH EXTERNO */}
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 mt-8 flex items-center gap-2">
+        <Send className="h-4 w-4" /> Outreach externo
+      </h2>
+      <Card className="mb-8">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Email a centros externos</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Pega los emails separados por líneas, comas o punto y coma. Máximo 150 por envío.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <OutreachBlast />
+        </CardContent>
+      </Card>
 
       <p className="text-xs text-muted-foreground text-center mt-8">
         Datos actualizados en cada visita · Solo visible para administradores
