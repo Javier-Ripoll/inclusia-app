@@ -172,7 +172,7 @@ export function ChatWindow({
           return (
             <div key={msg.id}>
               {showTime && (
-                <p className="text-center text-xs text-muted-foreground my-3">
+                <p className="text-center text-xs text-muted-foreground my-3" suppressHydrationWarning>
                   {formatTime(msg.created_at)}
                 </p>
               )}
