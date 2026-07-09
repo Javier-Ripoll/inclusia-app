@@ -28,7 +28,7 @@ export default async function ChatPage() {
   // Load conversations
   const { data: conversations } = await supabase
     .from('conversations')
-    .select('id, last_message_at, offer_id, professional_profile_id, job_offers ( title ), company_profiles ( id, company_name ), professional_profiles ( id )')
+    .select('id, last_message_at, offer_id, professional_id, job_offers ( title ), company_profiles ( id, company_name ), professional_profiles ( id )')
     .order('last_message_at', { ascending: false })
 
   // Fetch professional names via service role (RLS blocks cross-user reads)
@@ -36,7 +36,7 @@ export default async function ChatPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-  const convProfIds = (conversations ?? []).map((c: any) => c.professional_profiles?.id).filter(Boolean)
+  const convProfIds = (conversations ?? []).map((c: any) => c.professional_id).filter(Boolean)
   const { data: convProfData } = convProfIds.length > 0
     ? await serviceSupabase.from('professional_profiles').select('id, profiles(full_name)').in('id', convProfIds)
     : { data: [] }
@@ -65,8 +65,7 @@ export default async function ChatPage() {
         <div className="space-y-2">
           {conversations.map((conv: any) => {
             const company = conv.company_profiles
-            const prof = conv.professional_profiles
-            const profExtra = convProfMap[prof?.id]
+            const profExtra = convProfMap[conv.professional_id]
             const profProfiles = Array.isArray(profExtra?.profiles) ? profExtra.profiles[0] : profExtra?.profiles
             const profName = profProfiles?.full_name ?? 'Profesional'
             const otherName = isProfessional ? company?.company_name : profName
