@@ -62,7 +62,7 @@ export default async function ChatPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-6">
           {conversations.map((conv: any) => {
             const company = conv.company_profiles
             const profExtra = convProfMap[conv.professional_id]
