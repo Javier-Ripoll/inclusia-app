@@ -53,6 +53,17 @@ function RegisterForm() {
       return
     }
 
+    // Enviar email de bienvenida (fire-and-forget, no bloquea el flujo)
+    fetch('/api/email/bienvenida', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        fullName,
+        role: role === 'profesional' ? 'professional' : 'company',
+      }),
+    }).catch(() => {})
+
     // Si hay sesión activa (confirmación desactivada), redirigir directo al dashboard
     if (authData.session) {
       window.location.href = '/dashboard'
