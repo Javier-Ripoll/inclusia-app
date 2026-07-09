@@ -124,7 +124,7 @@ export function ChatWindow({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ conversationId, senderName: currentUserName, senderUserId: currentUserId }),
-      }).catch(() => {})
+      }).then(r => r.json()).then(d => console.log('[chat-notify]', d)).catch(e => console.error('[chat-notify error]', e))
     }
 
     setSending(false)
