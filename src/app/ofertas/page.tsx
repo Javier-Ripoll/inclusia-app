@@ -123,7 +123,7 @@ async function getOffers(filters: Filters = {}) {
     const url = new URL(`${supabaseUrl}/rest/v1/job_offers`)
     url.searchParams.set('select', '*,company_profiles(company_name,logo_url,verified)')
     url.searchParams.set('status', 'eq.active')
-    url.searchParams.set('order', 'is_urgent.desc,created_at.desc')
+    url.searchParams.set('order', 'created_at.desc')
     url.searchParams.set('limit', '50')
 
     if (filters.urgente)    url.searchParams.set('is_urgent', 'eq.true')
