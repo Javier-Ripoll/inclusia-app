@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Inclusia – Conectamos centros educativos con profesionales de apoyo',
+    default: 'Inclusia – Ofertas de trabajo en sector social y apoyo educativo',
     template: '%s | Inclusia',
   },
   description: 'Ofertas de trabajo en sector social y apoyo educativo: Terapeuta Ocupacional, Logopeda, Psicólogo, Integrador Social, Educador Social, Trabajador Social, PATI. Conectamos centros educativos con los mejores profesionales.',
