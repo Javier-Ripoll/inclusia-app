@@ -4,7 +4,7 @@
 
 -- Cuando un profesional aplica a una oferta → notificar a la empresa
 create or replace function notify_new_application()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 declare
   offer_title text;
   company_user_id uuid;
@@ -43,7 +43,7 @@ create trigger on_new_application
 
 -- Cuando la empresa actualiza el estado de una candidatura → notificar al profesional
 create or replace function notify_application_status_change()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 declare
   professional_user_id uuid;
   offer_title text;
@@ -93,7 +93,7 @@ create trigger on_application_status_change
 
 -- Cuando se publica una oferta urgente → notificar a profesionales disponibles en la misma provincia
 create or replace function notify_urgent_offer()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 declare
   prof_record record;
 begin
